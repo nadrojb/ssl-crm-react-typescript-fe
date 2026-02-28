@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginForm from "./pages/Login";
 
 function App() {
@@ -14,12 +14,6 @@ function App() {
               <div className="text-center space-y-4">
                 <h1 className="text-2xl font-semibold">Page not found</h1>
                 <div className="space-x-3">
-                  <Link className="text-indigo-600 hover:underline" to="/login">
-                    Go to Login
-                  </Link>
-                  <Link className="text-indigo-600 hover:underline" to="/register">
-                    Go to Register
-                  </Link>
                 </div>
               </div>
             </div>
