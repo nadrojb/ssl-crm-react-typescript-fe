@@ -4,6 +4,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import LoginForm from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Jobs from "./pages/Jobs";
+import Institutions from "./pages/Institutions";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/jobs" element={<ProtectedRoute><Jobs/></ProtectedRoute>}/>
+          <Route path="/institutions" element={<ProtectedRoute><Institutions/></ProtectedRoute>}/>
 
           <Route
             path="*"

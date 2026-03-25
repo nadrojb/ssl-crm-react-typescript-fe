@@ -1,19 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Layout } from "../../components/Layout";
 import { DataTable } from "../../components/DataTable";
 import { getJobs, type Job } from "../../api/jobs";
-import {
-    getAppErrorMessage,
-    isAppError,
-    toAppError,
-    type AppError,
-} from "../../api/errorHandler";
+import { getAppErrorMessage } from "../../api/errorHandler";
+import { useAsyncData } from "../../hooks/use-async-data";
 
 export function Jobs() {
-    const [jobs, setJobs] = useState<readonly Job[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [error, setError] = useState<AppError | null>(null);
-    console.log(jobs)
+    const { data, isLoading, error } = useAsyncData(
+        async () => getJobs({ page: 1 }),
+        []
+    );
+
+    const jobs = data?.data ?? [];
     const columns = useMemo(
         () =>
             [
@@ -45,36 +43,6 @@ export function Jobs() {
             ] as const,
         []
     );
-
-    useEffect(() => {
-        let isMounted = true;
-
-        const run = async () => {
-            setIsLoading(true);
-            setError(null);
-
-            try {
-                const result = await getJobs({ page: 1 });
-                if (isMounted) {
-                    setJobs(result.data);
-                }
-            } catch (e: unknown) {
-                if (isMounted) {
-                    setError(isAppError(e) ? e : toAppError(e));
-                }
-            } finally {
-                if (isMounted) {
-                    setIsLoading(false);
-                }
-            }
-        };
-
-        void run();
-
-        return () => {
-            isMounted = false;
-        };
-    }, []);
 
     return (
         <Layout>
