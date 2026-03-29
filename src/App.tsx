@@ -5,6 +5,9 @@ import LoginForm from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Jobs from "./pages/Jobs";
 import Institutions from "./pages/Institutions";
+import Calendar from "./pages/Calendar";
+import Tasks from "./pages/Tasks";
+import Contacts from "./pages/Contacts";
 
 function App() {
   return (
@@ -14,10 +17,17 @@ function App() {
           <Route path="/login" element={<LoginForm />} />
           
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/>
-          
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
           <Route path="/jobs" element={<ProtectedRoute><Jobs/></ProtectedRoute>}/>
+
           <Route path="/institutions" element={<ProtectedRoute><Institutions/></ProtectedRoute>}/>
+
+          <Route path="/calendar" element={<ProtectedRoute><Calendar/></ProtectedRoute>}/>
+
+          <Route path="/tasks" element={<ProtectedRoute><Tasks/></ProtectedRoute>}/>
+
+          <Route path="/contacts" element={<ProtectedRoute><Contacts/></ProtectedRoute>}/>
 
           <Route
             path="*"

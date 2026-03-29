@@ -1,6 +1,6 @@
 import { Layout } from "../../components/Layout";
 import { DataTable } from "../../components/DataTable";
-import { StatusBadge } from "../../components/StatusBadge";
+import { StatusBadge } from "../../components/Badge";
 
 const mockCustomers = [
   {
