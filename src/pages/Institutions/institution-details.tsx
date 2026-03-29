@@ -41,6 +41,16 @@ export function InstitutionDetails() {
 
   const jobs = jobsResponse?.data ?? [];
 
+  type TaskRow = {
+    name: string;
+    status: string;
+  };
+
+  type DocumentRow = {
+    name: string;
+    fileType: string;
+  };
+
   const jobsColumns = useMemo(
     () =>
       [
@@ -73,14 +83,14 @@ export function InstitutionDetails() {
         {
           id: "name",
           header: "Task",
-          cell: (row: { name: string }) => row.name,
+          cell: (row: TaskRow) => row.name,
           cellClassName:
             "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
         },
         {
           id: "status",
           header: "Status",
-          cell: (row: { status: string }) => row.status,
+          cell: (row: TaskRow) => row.status,
           cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
         },
       ] as const,
@@ -93,14 +103,14 @@ export function InstitutionDetails() {
         {
           id: "name",
           header: "Document",
-          cell: (row: { name: string }) => row.name,
+          cell: (row: DocumentRow) => row.name,
           cellClassName:
             "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
         },
         {
           id: "fileType",
           header: "File type",
-          cell: (row: { fileType: string }) => row.fileType,
+          cell: (row: DocumentRow) => row.fileType,
           cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
         },
       ] as const,
@@ -143,7 +153,7 @@ export function InstitutionDetails() {
                     </div>
                     <div>
                       <div className="text-xs uppercase tracking-wide text-gray-500">
-                        Service booked
+                        Service date
                       </div>
                       <div className="mt-1 text-sm font-medium text-gray-900">
                         {institution?.service_booked_at ?? "—"}
@@ -151,7 +161,7 @@ export function InstitutionDetails() {
                     </div>
                     <div>
                       <div className="text-xs uppercase tracking-wide text-gray-500">
-                        Remedials booked
+                        Remedials date
                       </div>
                       <div className="mt-1 text-sm font-medium text-gray-900">
                         {institution?.remedials_booked_at ?? "—"}
@@ -201,14 +211,14 @@ export function InstitutionDetails() {
               />
             )}
 
-            <DataTable
+            <DataTable<TaskRow>
               title="Tasks"
               data={[]}
               columns={tasksColumns}
               getRowKey={(row) => row.name}
             />
 
-            <DataTable
+            <DataTable<DocumentRow>
               title="Documents"
               data={[]}
               columns={documentsColumns}

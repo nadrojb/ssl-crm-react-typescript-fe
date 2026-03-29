@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 import type { DataTableColumn, DataTableProps } from "./types";
 
+import { uiColors } from "../../styles/ui-colors";
+
 const defaultHeaderClassName =
   "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider";
 
@@ -35,15 +37,17 @@ export function DataTable<Row>({
   onRowClick,
 }: DataTableProps<Row>) {
   return (
-    <div className="rounded-lg bg-white shadow-sm border border-gray-100">
+    <div
+      className={`rounded-lg ${uiColors.surface} shadow-sm border ${uiColors.borderSubtle}`}
+    >
       {title != null ? (
-        <div className="border-b border-gray-100 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        <div className={`border-b ${uiColors.borderSubtle} px-6 py-4`}>
+          <h2 className={`text-lg font-semibold ${uiColors.textPrimary}`}>{title}</h2>
         </div>
       ) : null}
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className={uiColors.surfaceMuted}>
             <tr>
               {columns.map((column: DataTableColumn<Row>) => (
                 <TableHeaderCell
@@ -55,12 +59,14 @@ export function DataTable<Row>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className={`divide-y ${uiColors.borderSubtle}`}>
             {data.map((row) => (
               <tr
                 key={getRowKey(row)}
                 className={
-                  onRowClick ? "hover:bg-gray-50 cursor-pointer" : "hover:bg-gray-50"
+                  onRowClick
+                    ? `${uiColors.hoverSurfaceMuted} cursor-pointer`
+                    : uiColors.hoverSurfaceMuted
                 }
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
               >

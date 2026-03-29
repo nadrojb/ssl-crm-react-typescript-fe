@@ -1,3 +1,5 @@
+import { uiColors } from "../../styles/ui-colors";
+
 type InstitutionTypeChipProps = {
     typeName: string | null | undefined;
 };
@@ -7,15 +9,15 @@ const getInstitutionTypeClasses = (
 ): string => {
     const normalized = typeName?.trim().toLowerCase();
 
-    if (normalized === "school") return "bg-red-100 text-red-800";
-    if (normalized === "arena") return "bg-blue-100 text-blue-800";
-    if (normalized === "leisure centre") return "bg-green-100 text-green-800";
-    if (normalized === "theatre") return "bg-purple-100 text-purple-800";
+    if (normalized === "school") return uiColors.pill.red;
+    if (normalized === "arena") return uiColors.pill.blue;
+    if (normalized === "leisure centre") return uiColors.pill.green;
+    if (normalized === "theatre") return uiColors.pill.purple;
     if (normalized === "university" || normalized === "unniversity") {
-        return "bg-pink-100 text-pink-800";
+        return uiColors.pill.pink;
     }
 
-    return "bg-gray-100 text-gray-800";
+    return uiColors.pill.neutral;
 };
 
 export function InstitutionTypeChip({ typeName }: InstitutionTypeChipProps) {

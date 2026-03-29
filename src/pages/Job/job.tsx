@@ -18,20 +18,30 @@ export function Job() {
     [jobId]
   );
 
+  type TaskRow = {
+    name: string;
+    status: string;
+  };
+
+  type DocumentRow = {
+    name: string;
+    fileType: string;
+  };
+
   const tasksColumns = useMemo(
     () =>
       [
         {
           id: "name",
           header: "Task",
-          cell: (row: { name: string }) => row.name,
+          cell: (row: TaskRow) => row.name,
           cellClassName:
             "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
         },
         {
           id: "status",
           header: "Status",
-          cell: (row: { status: string }) => row.status,
+          cell: (row: TaskRow) => row.status,
           cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
         },
       ] as const,
@@ -44,14 +54,14 @@ export function Job() {
         {
           id: "name",
           header: "Document",
-          cell: (row: { name: string }) => row.name,
+          cell: (row: DocumentRow ) => row.name,
           cellClassName:
             "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
         },
         {
           id: "fileType",
           header: "File type",
-          cell: (row: { fileType: string }) => row.fileType,
+          cell: (row: DocumentRow) => row.fileType,
           cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
         },
       ] as const,

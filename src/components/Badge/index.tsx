@@ -1,3 +1,5 @@
+import { uiColors } from "../../styles/ui-colors";
+
 export type StatusBadgeStatus = "Active" | "Pending" | "Inactive";
 
 type StatusBadgeProps = {
@@ -5,9 +7,9 @@ type StatusBadgeProps = {
 };
 
 const statusStyles: Record<StatusBadgeStatus, string> = {
-    Active: "bg-green-100 text-green-800",
-    Pending: "bg-yellow-100 text-yellow-800",
-    Inactive: "bg-gray-100 text-gray-800",
+    Active: uiColors.pill.green,
+    Pending: uiColors.pill.yellow,
+    Inactive: uiColors.pill.neutral,
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {
