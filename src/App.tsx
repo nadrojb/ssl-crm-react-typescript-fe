@@ -4,7 +4,9 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import LoginForm from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Jobs from "./pages/Jobs";
+import JobDetails from "./pages/Jobs/job-details";
 import Institutions from "./pages/Institutions";
+import InstitutionDetails from "./pages/Institutions/institution-details";
 import Calendar from "./pages/Calendar";
 import Tasks from "./pages/Tasks";
 import Contacts from "./pages/Contacts";
@@ -20,8 +22,10 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
           <Route path="/jobs" element={<ProtectedRoute><Jobs/></ProtectedRoute>}/>
+          <Route path="/jobs/:id" element={<ProtectedRoute><JobDetails/></ProtectedRoute>}/>
 
           <Route path="/institutions" element={<ProtectedRoute><Institutions/></ProtectedRoute>}/>
+          <Route path="/institutions/:id" element={<ProtectedRoute><InstitutionDetails/></ProtectedRoute>}/>
 
           <Route path="/calendar" element={<ProtectedRoute><Calendar/></ProtectedRoute>}/>
 

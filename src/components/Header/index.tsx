@@ -1,10 +1,12 @@
-import { Menu, Search, Bell } from "lucide-react";
+import { Menu, Bell } from "lucide-react";
+import type { ReactNode } from "react";
 
 interface HeaderProps {
   onMenuClick: () => void;
+  title: ReactNode;
 }
 
-export function Header({ onMenuClick }: HeaderProps) {
+export function Header({ onMenuClick, title }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4  bg-slate-50 px-4 md:px-6">
       <button
@@ -15,14 +17,7 @@ export function Header({ onMenuClick }: HeaderProps) {
       </button>
 
       <div className="flex-1">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full rounded-md border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-        </div>
+        <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
       </div>
 
       <button className="relative p-2 hover:bg-gray-100 rounded-md">

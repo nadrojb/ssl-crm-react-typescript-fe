@@ -2,7 +2,7 @@ import {Layout} from "../../components/Layout";
 
 export function Contacts() {
     return (
-        <Layout>
+        <Layout title="Contacts">
         <div>Under Construction</div>
         </Layout>
     )

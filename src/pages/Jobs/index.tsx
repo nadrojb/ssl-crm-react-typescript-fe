@@ -1,14 +1,47 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "../../components/Layout";
 import { DataTable } from "../../components/DataTable";
+import { DataTableToolbar } from "../../components/DataTableToolbar";
 import { getJobs, type Job } from "../../api/jobs";
 import { getAppErrorMessage } from "../../api/errorHandler";
 import { useAsyncData } from "../../hooks/use-async-data";
 
 export function Jobs() {
-    const { data, isLoading, error } = useAsyncData(
-        async () => getJobs({ page: 1 }),
+    const navigate = useNavigate();
+
+    const [searchValue, setSearchValue] = useState<string>("");
+    const [filterValue, setFilterValue] = useState<string>("all");
+    const [sortValue, setSortValue] = useState<string>("-created_at");
+
+    const filterOptions = useMemo(
+        () =>
+            [
+                { value: "all", label: "All" },
+            ] as const,
         []
+    );
+
+    const sortOptions = useMemo(
+        () =>
+            [
+                { value: "-created_at", label: "Created (newest)" },
+                { value: "created_at", label: "Created (oldest)" },
+                { value: "name", label: "Name (A–Z)" },
+                { value: "-name", label: "Name (Z–A)" },
+            ] as const,
+        []
+    );
+
+    const { data, isLoading, error } = useAsyncData(
+        async () =>
+            getJobs({
+                page: 1,
+                perPage: 25,
+                sort: sortValue,
+                filterName: searchValue.trim().length > 0 ? searchValue.trim() : undefined,
+            }),
+        [searchValue, sortValue]
     );
 
     const jobs = data?.data ?? [];
@@ -45,11 +78,7 @@ export function Jobs() {
     );
 
     return (
-        <Layout>
-            <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-gray-900">Jobs</h1>
-            </div>
-
+        <Layout title="Jobs">
             {error ? (
                 <div className="mb-4 text-red-600">
                     {getAppErrorMessage(error)}
@@ -59,12 +88,27 @@ export function Jobs() {
             {isLoading ? (
                 <div>Loading…</div>
             ) : (
-                <DataTable
-                    title="Jobs"
-                    data={jobs}
-                    columns={columns}
-                    getRowKey={(job) => job.id}
-                />
+                <>
+                    <DataTableToolbar
+                        searchValue={searchValue}
+                        onSearchValueChange={setSearchValue}
+                        filterLabel="Filter"
+                        filterValue={filterValue}
+                        onFilterValueChange={setFilterValue}
+                        filterOptions={filterOptions}
+                        sortLabel="Sort"
+                        sortValue={sortValue}
+                        onSortValueChange={setSortValue}
+                        sortOptions={sortOptions}
+                    />
+                    <DataTable
+                        title="Jobs"
+                        data={jobs}
+                        columns={columns}
+                        getRowKey={(job) => job.id}
+                        onRowClick={(job) => navigate(`/jobs/${job.id}`)}
+                    />
+                </>
             )}
         </Layout>
     );

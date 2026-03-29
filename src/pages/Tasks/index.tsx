@@ -2,7 +2,7 @@ import {Layout} from "../../components/Layout";
 
 export function Tasks() {
     return (
-        <Layout>
+        <Layout title="Tasks">
         <div>Tasks</div>
         </Layout>
     )

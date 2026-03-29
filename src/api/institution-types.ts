@@ -1,32 +1,33 @@
 import { z } from "zod";
+
 import { apiClient } from "./client";
 import { toAppError, type AppError } from "./errorHandler";
-import { JobSchema, type Job } from "./schemas/job";
-import {
-    InstitutionSchema,
-    type Institution,
-    type InstitutionType,
-    type PrimaryContact,
-} from "./schemas/institution";
 
-export { InstitutionSchema, type Institution, type InstitutionType, type PrimaryContact };
-export { JobSchema, type Job };
+export const InstitutionTypeSchema = z.object({
+    id: z.number().int(),
+    name: z.string(),
+    created_at: z.union([z.string(), z.null()]).optional(),
+    updated_at: z.union([z.string(), z.null()]).optional(),
+});
 
-export const JobsListResponseSchema = z.object({
-    data: z.array(JobSchema),
+export type InstitutionType = z.infer<typeof InstitutionTypeSchema>;
+
+export const InstitutionTypesListResponseSchema = z.object({
+    data: z.array(InstitutionTypeSchema),
     links: z.unknown().optional(),
     meta: z.unknown().optional(),
 });
 
-export type JobsListResponse = z.infer<typeof JobsListResponseSchema>;
+export type InstitutionTypesListResponse = z.infer<
+    typeof InstitutionTypesListResponseSchema
+>;
 
-export async function getJobs(params?: {
+export async function getInstitutionTypes(params?: {
     page?: number;
     perPage?: number;
     sort?: string;
     filterName?: string;
-    filterInstitutionId?: number;
-}): Promise<JobsListResponse> {
+}): Promise<InstitutionTypesListResponse> {
     try {
         const queryParams: Record<string, string | number> = {};
 
@@ -46,15 +47,11 @@ export async function getJobs(params?: {
             queryParams["filter[name]"] = params.filterName;
         }
 
-        if (params?.filterInstitutionId != null) {
-            queryParams["filter[institution_id]"] = params.filterInstitutionId;
-        }
-
-        const response = await apiClient.get("/jobs", {
+        const response = await apiClient.get("/institution-types", {
             params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
         });
 
-        return JobsListResponseSchema.parse(response.data);
+        return InstitutionTypesListResponseSchema.parse(response.data);
     } catch (error: unknown) {
         const appError: AppError = toAppError(error);
         throw appError;

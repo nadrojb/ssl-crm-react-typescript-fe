@@ -1,17 +1,64 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { getInstitutions, type InstitutionsListResponse } from "../../api/institutions";
+import { getInstitutionTypes } from "../../api/institution-types";
 import { type Institution } from "../../api/schemas/institution";
 import { getAppErrorMessage } from "../../api/errorHandler";
 import { DataTable } from "../../components/DataTable";
+import { DataTableToolbar } from "../../components/DataTableToolbar";
 import { InstitutionTypeChip } from "../../components/InstitutionTypeChip";
 import { Layout } from "../../components/Layout";
 import { useAsyncData } from "../../hooks/use-async-data";
 
 export function Institutions() {
-    const { data, isLoading, error } = useAsyncData<InstitutionsListResponse>(
-        () => getInstitutions({ page: 1 }),
+    const navigate = useNavigate();
+
+    const [searchValue, setSearchValue] = useState<string>("");
+    const [filterValue, setFilterValue] = useState<string>("all");
+    const [sortValue, setSortValue] = useState<string>("name");
+
+    const { data: institutionTypesData } = useAsyncData(
+        async () => getInstitutionTypes({ page: 1, perPage: 250, sort: "name" }),
         []
+    );
+
+    const institutionTypeOptions = useMemo(() => {
+        const apiTypes = institutionTypesData?.data ?? [];
+        return apiTypes.map((type) => ({
+            value: String(type.id),
+            label: type.name,
+        }));
+    }, [institutionTypesData]);
+
+    const filterOptions = useMemo(() => {
+        return [{ value: "all", label: "All" }, ...institutionTypeOptions] as const;
+    }, [institutionTypeOptions]);
+
+    const sortOptions = useMemo(
+        () =>
+            [
+                { value: "name", label: "Name (A–Z)" },
+                { value: "-name", label: "Name (Z–A)" },
+                { value: "service_due_at", label: "Service due (soonest)" },
+                { value: "-service_due_at", label: "Service due (latest)" },
+                { value: "created_at", label: "Created (oldest)" },
+                { value: "-created_at", label: "Created (newest)" },
+            ] as const,
+        []
+    );
+
+    const { data, isLoading, error } = useAsyncData<InstitutionsListResponse>(
+        () =>
+            getInstitutions({
+                page: 1,
+                perPage: 25,
+                sort: sortValue,
+                filterName: searchValue.trim().length > 0 ? searchValue.trim() : undefined,
+                filterTypeId:
+                    filterValue === "all" ? undefined : Number(filterValue),
+            }),
+        [filterValue, searchValue, sortValue]
     );
 
     const institutions = data?.data ?? [];
@@ -69,12 +116,7 @@ export function Institutions() {
     );
 
     return (
-        <Layout>
-            <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-gray-900">
-                    Institutions
-                </h1>
-            </div>
+        <Layout title="Institutions">
 
             {error ? (
                 <div className="mb-4 text-red-600">
@@ -85,12 +127,29 @@ export function Institutions() {
             {isLoading ? (
                 <div>Loading…</div>
             ) : (
-                <DataTable
-                    title="Institutions"
-                    data={institutions}
-                    columns={columns}
-                    getRowKey={(institution) => institution.id}
-                />
+                <>
+                    <DataTableToolbar
+                        searchValue={searchValue}
+                        onSearchValueChange={setSearchValue}
+                        filterLabel="Filter"
+                        filterValue={filterValue}
+                        onFilterValueChange={setFilterValue}
+                        filterOptions={filterOptions}
+                        sortLabel="Sort"
+                        sortValue={sortValue}
+                        onSortValueChange={setSortValue}
+                        sortOptions={sortOptions}
+                    />
+                    <DataTable
+                        title="Institutions"
+                        data={institutions}
+                        columns={columns}
+                        getRowKey={(institution) => institution.id}
+                        onRowClick={(institution) =>
+                            navigate(`/institutions/${institution.id}`)
+                        }
+                    />
+                </>
             )}
         </Layout>
     );

@@ -15,6 +15,7 @@ type DataTableProps<Row> = {
   data: readonly Row[];
   columns: readonly DataTableColumn<Row>[];
   getRowKey: (row: Row) => string | number;
+  onRowClick?: (row: Row) => void;
 };
 
 export type { DataTableColumn, DataTableProps };

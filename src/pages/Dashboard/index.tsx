@@ -83,9 +83,8 @@ export function Dashboard() {
   ] as const;
 
   return (
-    <Layout>
+    <Layout title="Dashboard">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
         <p className="text-gray-500">Welcome back, Admin</p>
       </div>
 

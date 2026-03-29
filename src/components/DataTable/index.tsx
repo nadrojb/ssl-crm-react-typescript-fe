@@ -32,6 +32,7 @@ export function DataTable<Row>({
   data,
   columns,
   getRowKey,
+  onRowClick,
 }: DataTableProps<Row>) {
   return (
     <div className="rounded-lg bg-white shadow-sm border border-gray-100">
@@ -56,7 +57,13 @@ export function DataTable<Row>({
           </thead>
           <tbody className="divide-y divide-gray-100">
             {data.map((row) => (
-              <tr key={getRowKey(row)} className="hover:bg-gray-50">
+              <tr
+                key={getRowKey(row)}
+                className={
+                  onRowClick ? "hover:bg-gray-50 cursor-pointer" : "hover:bg-gray-50"
+                }
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+              >
                 {columns.map((column) => (
                   <TableCell
                     key={column.id}

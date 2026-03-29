@@ -4,9 +4,10 @@ import { Header } from "../Header";
 
 interface LayoutProps {
   children: ReactNode;
+  title: ReactNode;
 }
 
-export function Layout({ children }: LayoutProps) {
+export function Layout({ children, title }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -14,7 +15,7 @@ export function Layout({ children }: LayoutProps) {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       <div className="md:pl-64">
-        <Header onMenuClick={() => setSidebarOpen(true)} />
+        <Header onMenuClick={() => setSidebarOpen(true)} title={title} />
         
         <main className="p-4 md:p-6">
           {children}
