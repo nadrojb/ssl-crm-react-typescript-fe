@@ -13,6 +13,12 @@ export type InstitutionsListResponse = z.infer<
     typeof InstitutionsListResponseSchema
 >;
 
+export const InstitutionResponseSchema = z.object({
+    data: InstitutionSchema,
+});
+
+export type InstitutionResponse = z.infer<typeof InstitutionResponseSchema>;
+
 export async function getInstitutions(params?: {
     page?: number;
     perPage?: number;
@@ -48,6 +54,16 @@ export async function getInstitutions(params?: {
         });
 
         return InstitutionsListResponseSchema.parse(response.data);
+    } catch (error: unknown) {
+        const appError: AppError = toAppError(error);
+        throw appError;
+    }
+}
+
+export async function getInstitution(id: number) {
+    try {
+        const response = await apiClient.get(`/institutions/${id}`);
+        return InstitutionResponseSchema.parse(response.data).data;
     } catch (error: unknown) {
         const appError: AppError = toAppError(error);
         throw appError;

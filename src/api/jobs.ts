@@ -1,7 +1,11 @@
 import { z } from "zod";
 import { apiClient } from "./client";
 import { toAppError, type AppError } from "./errorHandler";
-import { JobSchema, type Job } from "./schemas/job";
+import JobDetailsSchema, {
+    JobSchema,
+    type Job,
+    type JobDetails
+} from "./schemas/job";
 import {
     InstitutionSchema,
     type Institution,
@@ -12,6 +16,8 @@ import {
 export { InstitutionSchema, type Institution, type InstitutionType, type PrimaryContact };
 export { JobSchema, type Job };
 
+export type { JobDetails };
+
 export const JobsListResponseSchema = z.object({
     data: z.array(JobSchema),
     links: z.unknown().optional(),
@@ -19,6 +25,12 @@ export const JobsListResponseSchema = z.object({
 });
 
 export type JobsListResponse = z.infer<typeof JobsListResponseSchema>;
+
+export const JobResponseSchema = z.object({
+    data: JobDetailsSchema,
+});
+
+export type JobResponse = z.infer<typeof JobResponseSchema>;
 
 export async function getJobs(params?: {
     page?: number;
@@ -55,6 +67,16 @@ export async function getJobs(params?: {
         });
 
         return JobsListResponseSchema.parse(response.data);
+    } catch (error: unknown) {
+        const appError: AppError = toAppError(error);
+        throw appError;
+    }
+}
+
+export async function getJob(id: number): Promise<JobDetails> {
+    try {
+        const response = await apiClient.get(`/jobs/${id}`);
+        return JobResponseSchema.parse(response.data).data;
     } catch (error: unknown) {
         const appError: AppError = toAppError(error);
         throw appError;

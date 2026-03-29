@@ -1,70 +1,21 @@
 import { useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import { getAppErrorMessage } from "../../api/errorHandler";
-import { getInstitution } from "../../api/institutions";
-import { getJobs, type Job } from "../../api/jobs";
+import { getJob, type JobDetails } from "../../api/jobs";
 import { Card } from "../../components/Card";
 import { DataTable } from "../../components/DataTable";
 import { Layout } from "../../components/Layout";
 import { useAsyncData } from "../../hooks/use-async-data";
 
-export function InstitutionDetails() {
+export function Job() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
-  const institutionId = id != null ? Number(id) : NaN;
+  const jobId = id != null ? Number(id) : NaN;
 
-  const {
-    data: institution,
-    isLoading: isInstitutionLoading,
-    error: institutionError,
-  } = useAsyncData(
-    async () => getInstitution(institutionId),
-    [institutionId]
-  );
-
-  const {
-    data: jobsResponse,
-    isLoading: isJobsLoading,
-    error: jobsError,
-  } = useAsyncData(
-    async () =>
-      getJobs({
-        page: 1,
-        perPage: 25,
-        sort: "-created_at",
-        filterInstitutionId: institutionId,
-      }),
-    [institutionId]
-  );
-
-  const jobs = jobsResponse?.data ?? [];
-
-  const jobsColumns = useMemo(
-    () =>
-      [
-        {
-          id: "name",
-          header: "Job",
-          cell: (job: Job) => job.name,
-          cellClassName:
-            "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
-        },
-        {
-          id: "createdAt",
-          header: "Created",
-          cell: (job: Job) => job.created_at,
-          cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
-        },
-        {
-          id: "completedAt",
-          header: "Completed",
-          cell: (job: Job) => job.completed_at ?? "—",
-          cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
-        },
-      ] as const,
-    []
+  const { data: job, isLoading, error } = useAsyncData<JobDetails>(
+    async () => getJob(jobId),
+    [jobId]
   );
 
   const tasksColumns = useMemo(
@@ -108,16 +59,34 @@ export function InstitutionDetails() {
   );
 
   return (
-    <Layout title={institution?.name ?? "Institution"}>
+    <Layout title={job?.name ?? "Job"}>
       <div className="space-y-6">
-        {institutionError ? (
-          <div className="text-red-600">{getAppErrorMessage(institutionError)}</div>
-        ) : null}
-        {jobsError ? (
-          <div className="text-red-600">{getAppErrorMessage(jobsError)}</div>
+        <div className="flex items-start justify-end gap-3">
+          <button
+            type="button"
+            className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+          >
+            Complete
+          </button>
+          <button
+            type="button"
+            className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+          >
+            Archive
+          </button>
+          <button
+            type="button"
+            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
+          >
+            Edit
+          </button>
+        </div>
+
+        {error ? (
+          <div className="text-red-600">{getAppErrorMessage(error)}</div>
         ) : null}
 
-        {isInstitutionLoading ? (
+        {isLoading ? (
           <div>Loading…</div>
         ) : (
           <>
@@ -127,34 +96,39 @@ export function InstitutionDetails() {
                   <div className="space-y-4">
                     <div>
                       <div className="text-xs uppercase tracking-wide text-gray-500">
-                        Type
+                        Institution
                       </div>
                       <div className="mt-1 text-sm font-medium text-gray-900">
-                        {institution?.type?.name ?? "—"}
+                        {job?.institution?.name ?? "—"}
                       </div>
                     </div>
+
                     <div>
                       <div className="text-xs uppercase tracking-wide text-gray-500">
-                        Service due
+                        Job type
                       </div>
                       <div className="mt-1 text-sm font-medium text-gray-900">
-                        {institution?.service_due_at ?? "—"}
+                        {job?.crm_job_type?.name ?? "—"}
                       </div>
                     </div>
+
                     <div>
                       <div className="text-xs uppercase tracking-wide text-gray-500">
-                        Service booked
+                        Status
                       </div>
                       <div className="mt-1 text-sm font-medium text-gray-900">
-                        {institution?.service_booked_at ?? "—"}
+                        {job?.completed_at != null ? "Complete" : "Due"}
                       </div>
                     </div>
+
                     <div>
                       <div className="text-xs uppercase tracking-wide text-gray-500">
-                        Remedials booked
+                        Assigned to
                       </div>
                       <div className="mt-1 text-sm font-medium text-gray-900">
-                        {institution?.remedials_booked_at ?? "—"}
+                        {job?.users != null && job.users.length > 0
+                          ? job.users.map((u) => u.name).join(", ")
+                          : "—"}
                       </div>
                     </div>
                   </div>
@@ -166,40 +140,20 @@ export function InstitutionDetails() {
                   <div className="space-y-4">
                     <div>
                       <div className="text-xs uppercase tracking-wide text-gray-500">Name</div>
-                      <div className="mt-1 text-sm font-medium text-gray-900">
-                        {institution?.primary_contact
-                          ? `${institution.primary_contact.first_name} ${institution.primary_contact.last_name}`
-                          : "—"}
-                      </div>
+                      <div className="mt-1 text-sm font-medium text-gray-900">—</div>
                     </div>
                     <div>
                       <div className="text-xs uppercase tracking-wide text-gray-500">Email</div>
-                      <div className="mt-1 text-sm font-medium text-gray-900">
-                        {institution?.primary_contact?.email ?? "—"}
-                      </div>
+                      <div className="mt-1 text-sm font-medium text-gray-900">—</div>
                     </div>
                     <div>
                       <div className="text-xs uppercase tracking-wide text-gray-500">Phone</div>
-                      <div className="mt-1 text-sm font-medium text-gray-900">
-                        {institution?.primary_contact?.phone_number ?? "—"}
-                      </div>
+                      <div className="mt-1 text-sm font-medium text-gray-900">—</div>
                     </div>
                   </div>
                 </Card>
               </div>
             </div>
-
-            {isJobsLoading ? (
-              <div>Loading jobs…</div>
-            ) : (
-              <DataTable
-                title="Associated jobs"
-                data={jobs}
-                columns={jobsColumns}
-                getRowKey={(job) => job.id}
-                onRowClick={(job) => navigate(`/jobs/${job.id}`)}
-              />
-            )}
 
             <DataTable
               title="Tasks"
@@ -221,4 +175,4 @@ export function InstitutionDetails() {
   );
 }
 
-export default InstitutionDetails;
+export default Job;
