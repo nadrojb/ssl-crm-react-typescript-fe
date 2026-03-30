@@ -78,7 +78,7 @@ export function Jobs() {
     );
 
     return (
-        <Layout title="Jobs">
+        <Layout>
             {error ? (
                 <div className="mb-4 text-red-600">
                     {getAppErrorMessage(error)}

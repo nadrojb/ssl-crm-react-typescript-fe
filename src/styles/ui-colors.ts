@@ -2,10 +2,12 @@ export const uiColors = {
   surface: "bg-white",
   surfaceMuted: "bg-gray-50",
   borderSubtle: "border-gray-100",
+  divideSubtle: "divide-gray-100",
   textPrimary: "text-gray-900",
   textSecondary: "text-gray-600",
   textMuted: "text-gray-500",
   hoverSurfaceMuted: "hover:bg-gray-50",
+
 
   buttonPrimary: {
     background: "bg-blue-600",

@@ -56,9 +56,9 @@ export default function LoginForm() {
       const validated = LoginSchema.parse(candidate);
 
       // API call (already wrapped with AppError)
-      const { token, user } = await loginUser(validated);
+      const { token } = await loginUser(validated);
 
-      login(token, user);
+      await login(token);
       navigate("/");
     } catch (err) {
       // Zod (client-side validation errors)

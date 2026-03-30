@@ -59,7 +59,7 @@ export function DataTable<Row>({
               ))}
             </tr>
           </thead>
-          <tbody className={`divide-y ${uiColors.borderSubtle}`}>
+          <tbody className={`divide-y ${uiColors.divideSubtle}`}>
             {data.map((row) => (
               <tr
                 key={getRowKey(row)}

@@ -116,7 +116,7 @@ export function Institutions() {
     );
 
     return (
-        <Layout title="Institutions">
+        <Layout>
 
             {error ? (
                 <div className="mb-4 text-red-600">
