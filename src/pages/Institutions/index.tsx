@@ -9,6 +9,7 @@ import { DataTable } from "../../components/DataTable";
 import { DataTableToolbar } from "../../components/DataTableToolbar";
 import { InstitutionTypeChip } from "../../components/InstitutionTypeChip";
 import { Layout } from "../../components/Layout";
+import { ButtonStandard } from "../../components/ButtonStandard";
 import { useAsyncData } from "../../hooks/use-async-data";
 
 export function Institutions() {
@@ -117,6 +118,17 @@ export function Institutions() {
 
     return (
         <Layout>
+
+            <div className="mb-4 flex items-start justify-end">
+                <ButtonStandard
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={() => navigate("/institutions/new")}
+                >
+                    Create institution
+                </ButtonStandard>
+            </div>
 
             {error ? (
                 <div className="mb-4 text-red-600">

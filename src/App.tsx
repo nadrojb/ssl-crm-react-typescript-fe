@@ -7,6 +7,7 @@ import Jobs from "./pages/Jobs";
 import Job from "./pages/Job/job";
 import Institutions from "./pages/Institutions";
 import InstitutionDetails from "./pages/Institutions/institution-details";
+import InstitutionCreate from "./pages/Institutions/institution-create";
 import Calendar from "./pages/Calendar";
 import Tasks from "./pages/Tasks";
 import Contacts from "./pages/Contacts";
@@ -25,6 +26,7 @@ function App() {
           <Route path="/jobs/:id" element={<ProtectedRoute><Job/></ProtectedRoute>}/>
 
           <Route path="/institutions" element={<ProtectedRoute><Institutions/></ProtectedRoute>}/>
+          <Route path="/institutions/new" element={<ProtectedRoute><InstitutionCreate/></ProtectedRoute>}/>
           <Route path="/institutions/:id" element={<ProtectedRoute><InstitutionDetails/></ProtectedRoute>}/>
 
           <Route path="/calendar" element={<ProtectedRoute><Calendar/></ProtectedRoute>}/>

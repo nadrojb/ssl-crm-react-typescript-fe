@@ -1,14 +1,18 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { getAppErrorMessage } from "../../api/errorHandler";
 import { getJob, type JobDetails } from "../../api/jobs";
+import { ButtonStandard } from "../../components/ButtonStandard";
 import { Card } from "../../components/Card";
 import { DataTable } from "../../components/DataTable";
 import { Layout } from "../../components/Layout";
 import { useAsyncData } from "../../hooks/use-async-data";
+import { ConfirmModal } from "../../components/ConfirmModal";
 
 export function Job() {
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
   const { id } = useParams<{ id: string }>();
 
   const jobId = id != null ? Number(id) : NaN;
@@ -71,25 +75,30 @@ export function Job() {
   return (
     <Layout title={job?.name ?? "Job"}>
       <div className="space-y-6">
+        <ConfirmModal
+          isOpen={isConfirmModalOpen}
+          title="Confirm Archive"
+          message="Are you sure you want to archive this job?"
+          onClose={() => setIsConfirmModalOpen(false)}
+          onConfirm={() => {
+            setIsConfirmModalOpen(false);
+          }}
+        />
         <div className="flex items-start justify-end gap-3">
-          <button
-            type="button"
-            className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-          >
+          <ButtonStandard type="button" variant="success" size="sm">
             Complete
-          </button>
-          <button
+          </ButtonStandard>
+          <ButtonStandard
             type="button"
-            className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+            variant="dark"
+            size="sm"
+            onClick={() => setIsConfirmModalOpen(true)}
           >
             Archive
-          </button>
-          <button
-            type="button"
-            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
-          >
+          </ButtonStandard>
+          <ButtonStandard type="button" variant="secondary" size="sm">
             Edit
-          </button>
+          </ButtonStandard>
         </div>
 
         {error ? (

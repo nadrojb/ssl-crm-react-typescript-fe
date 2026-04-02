@@ -129,7 +129,7 @@ export default function LoginForm() {
                 aria-label="Password"
             />
 
-            <ButtonStandard type="submit" isLoading={isSubmitting}>
+            <ButtonStandard type="submit" isLoading={isSubmitting} fullWidth>
               Log in
             </ButtonStandard>
           </form>

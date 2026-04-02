@@ -2,6 +2,10 @@ import { apiClient } from "./client";
 import { z } from "zod";
 import { toAppError, type AppError } from "./errorHandler";
 import { InstitutionSchema } from "./schemas/institution";
+import {
+    type CreateInstitutionRequest,
+    type UpdateInstitutionRequest,
+} from "./schemas/institution-requests";
 
 export const InstitutionsListResponseSchema = z.object({
     data: z.array(InstitutionSchema),
@@ -63,6 +67,31 @@ export async function getInstitutions(params?: {
 export async function getInstitution(id: number) {
     try {
         const response = await apiClient.get(`/institutions/${id}`);
+        return InstitutionResponseSchema.parse(response.data).data;
+    } catch (error: unknown) {
+        const appError: AppError = toAppError(error);
+        throw appError;
+    }
+}
+
+export async function createInstitution(
+    payload: CreateInstitutionRequest
+): Promise<z.infer<typeof InstitutionSchema>> {
+    try {
+        const response = await apiClient.post("/institutions", payload);
+        return InstitutionResponseSchema.parse(response.data).data;
+    } catch (error: unknown) {
+        const appError: AppError = toAppError(error);
+        throw appError;
+    }
+}
+
+export async function updateInstitution(
+    id: number,
+    payload: UpdateInstitutionRequest
+): Promise<z.infer<typeof InstitutionSchema>> {
+    try {
+        const response = await apiClient.patch(`/institutions/${id}`, payload);
         return InstitutionResponseSchema.parse(response.data).data;
     } catch (error: unknown) {
         const appError: AppError = toAppError(error);
