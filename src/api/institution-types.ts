@@ -22,7 +22,7 @@ export type InstitutionTypesListResponse = z.infer<
     typeof InstitutionTypesListResponseSchema
 >;
 
-export async function getInstitutionTypes(params?: {
+export async function getInstitutionTypes(parameters?: {
     page?: number;
     perPage?: number;
     sort?: string;
@@ -31,20 +31,20 @@ export async function getInstitutionTypes(params?: {
     try {
         const queryParams: Record<string, string | number> = {};
 
-        if (params?.page != null) {
-            queryParams.page = params.page;
+        if (parameters?.page != null) {
+            queryParams.page = parameters.page;
         }
 
-        if (params?.perPage != null) {
-            queryParams.per_page = params.perPage;
+        if (parameters?.perPage != null) {
+            queryParams.per_page = parameters.perPage;
         }
 
-        if (params?.sort != null && params.sort.trim().length > 0) {
-            queryParams.sort = params.sort;
+        if (parameters?.sort != null && parameters.sort.trim().length > 0) {
+            queryParams.sort = parameters.sort;
         }
 
-        if (params?.filterName != null && params.filterName.trim().length > 0) {
-            queryParams["filter[name]"] = params.filterName;
+        if (parameters?.filterName != null && parameters.filterName.trim().length > 0) {
+            queryParams["filter[name]"] = parameters.filterName;
         }
 
         const response = await apiClient.get("/institution-types", {

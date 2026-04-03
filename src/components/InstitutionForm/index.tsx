@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { ZodError } from "zod";
 
 import { ButtonStandard } from "../ButtonStandard";
@@ -46,7 +46,7 @@ type InstitutionFormValues = {
   contactPhoneNumber: string;
 };
 
-type InstitutionFormSubmitPayload = {
+export type InstitutionFormSubmitPayload = {
   institution: CreateInstitutionRequest;
   newContact: CreateContactRequest | null;
 };
@@ -112,19 +112,17 @@ export const InstitutionForm = ({
     FieldErrors<InstitutionFormFields>
   >({});
 
-  const contactOptions = useMemo(() => {
-    return contacts
-      .slice()
-      .sort((a, b) => {
-        const aKey = `${a.last_name} ${a.first_name}`.toLowerCase();
-        const bKey = `${b.last_name} ${b.first_name}`.toLowerCase();
-        return aKey.localeCompare(bKey);
-      })
-      .map((contact) => ({
-        value: String(contact.id),
-        label: getContactLabel(contact),
-      }));
-  }, [contacts]);
+  const contactOptions = contacts
+    .slice()
+    .sort((a, b) => {
+      const aKey = `${a.last_name} ${a.first_name}`.toLowerCase();
+      const bKey = `${b.last_name} ${b.first_name}`.toLowerCase();
+      return aKey.localeCompare(bKey);
+    })
+    .map((contact) => ({
+      value: String(contact.id),
+      label: getContactLabel(contact),
+    }));
 
   const handleChange = (
     e:

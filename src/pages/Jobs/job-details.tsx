@@ -1,79 +1,83 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { getAppErrorMessage } from "../../api/errorHandler";
-import { getJob, type JobDetails } from "../../api/jobs";
+import { getJob, type JobDetails as JobDetailsData } from "../../api/jobs";
+import { getErrorMessage } from "../../utils/errors";
 import { ButtonStandard } from "../../components/ButtonStandard";
 import { Card } from "../../components/Card";
 import { DataTable } from "../../components/DataTable";
 import { Layout } from "../../components/Layout";
-import { useAsyncData } from "../../hooks/use-async-data";
 import { ConfirmModal } from "../../components/ConfirmModal";
 
-export function Job() {
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+type TaskRow = {
+  name: string;
+  status: string;
+};
 
+type DocumentRow = {
+  name: string;
+  fileType: string;
+};
+
+const tasksColumns = [
+  {
+    id: "name",
+    header: "Task",
+    cell: (row: TaskRow) => row.name,
+    cellClassName:
+      "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
+  },
+  {
+    id: "status",
+    header: "Status",
+    cell: (row: TaskRow) => row.status,
+    cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
+  },
+] as const;
+
+const documentsColumns = [
+  {
+    id: "name",
+    header: "Document",
+    cell: (row: DocumentRow) => row.name,
+    cellClassName:
+      "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
+  },
+  {
+    id: "fileType",
+    header: "File type",
+    cell: (row: DocumentRow) => row.fileType,
+    cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
+  },
+] as const;
+
+export function JobDetails() {
   const { id } = useParams<{ id: string }>();
-
   const jobId = id != null ? Number(id) : NaN;
 
-  const { data: job, isLoading, error } = useAsyncData<JobDetails>(
-    async () => getJob(jobId),
-    [jobId]
-  );
+  const [job, setJob] = useState<JobDetailsData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
-  type TaskRow = {
-    name: string;
-    status: string;
-  };
-
-  type DocumentRow = {
-    name: string;
-    fileType: string;
-  };
-
-  const tasksColumns = useMemo(
-    () =>
-      [
-        {
-          id: "name",
-          header: "Task",
-          cell: (row: TaskRow) => row.name,
-          cellClassName:
-            "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
-        },
-        {
-          id: "status",
-          header: "Status",
-          cell: (row: TaskRow) => row.status,
-          cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
-        },
-      ] as const,
-    []
-  );
-
-  const documentsColumns = useMemo(
-    () =>
-      [
-        {
-          id: "name",
-          header: "Document",
-          cell: (row: DocumentRow ) => row.name,
-          cellClassName:
-            "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
-        },
-        {
-          id: "fileType",
-          header: "File type",
-          cell: (row: DocumentRow) => row.fileType,
-          cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
-        },
-      ] as const,
-    []
-  );
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await getJob(jobId);
+        setJob(res);
+      } catch (err: unknown) {
+        setError(getErrorMessage(err));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, [jobId]);
 
   return (
-    <Layout title={job?.name ?? "Job"}>
+    <Layout title={job?.name ?? "JobDetails"}>
       <div className="space-y-6">
         <ConfirmModal
           isOpen={isConfirmModalOpen}
@@ -102,7 +106,7 @@ export function Job() {
         </div>
 
         {error ? (
-          <div className="text-red-600">{getAppErrorMessage(error)}</div>
+          <div className="text-red-600">{error}</div>
         ) : null}
 
         {isLoading ? (
@@ -194,4 +198,4 @@ export function Job() {
   );
 }
 
-export default Job;
+export default JobDetails;

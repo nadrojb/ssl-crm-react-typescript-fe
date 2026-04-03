@@ -1,147 +1,164 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { getAppErrorMessage, isAppError, toAppError } from "../../api/errorHandler";
 import { createContact, getContacts } from "../../api/contacts";
-import { getInstitutionTypes } from "../../api/institution-types";
+import { getInstitutionTypes, type InstitutionType } from "../../api/institution-types";
 import { getInstitution, updateInstitution } from "../../api/institutions";
 import { getJobs, type Job } from "../../api/jobs";
+import type { Institution } from "../../api/schemas/institution";
 import type { Contact } from "../../api/schemas/contact";
+import { getErrorMessage } from "../../utils/errors";
 import { Card } from "../../components/Card";
 import { Drawer } from "../../components/Drawer";
 import { DataTable } from "../../components/DataTable";
-import { InstitutionForm } from "../../components/InstitutionForm";
+import { InstitutionForm, type InstitutionFormSubmitPayload } from "../../components/InstitutionForm";
 import { Layout } from "../../components/Layout";
 import { ButtonStandard } from "../../components/ButtonStandard";
-import { useAsyncData } from "../../hooks/use-async-data";
+
+type TaskRow = {
+  name: string;
+  status: string;
+};
+
+type DocumentRow = {
+  name: string;
+  fileType: string;
+};
+
+const jobsColumns = [
+  {
+    id: "name",
+    header: "JobDetails",
+    cell: (job: Job) => job.name,
+    cellClassName:
+      "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
+  },
+  {
+    id: "createdAt",
+    header: "Created",
+    cell: (job: Job) => job.created_at,
+    cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
+  },
+  {
+    id: "completedAt",
+    header: "Completed",
+    cell: (job: Job) => job.completed_at ?? "—",
+    cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
+  },
+] as const;
+
+const tasksColumns = [
+  {
+    id: "name",
+    header: "Task",
+    cell: (row: TaskRow) => row.name,
+    cellClassName:
+      "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
+  },
+  {
+    id: "status",
+    header: "Status",
+    cell: (row: TaskRow) => row.status,
+    cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
+  },
+] as const;
+
+const documentsColumns = [
+  {
+    id: "name",
+    header: "Document",
+    cell: (row: DocumentRow) => row.name,
+    cellClassName:
+      "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
+  },
+  {
+    id: "fileType",
+    header: "File type",
+    cell: (row: DocumentRow) => row.fileType,
+    cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
+  },
+] as const;
 
 export function InstitutionDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const institutionId = id != null ? Number(id) : NaN;
+
+  const [institution, setInstitution] = useState<Institution | null>(null);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [institutionTypes, setInstitutionTypes] = useState<InstitutionType[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null);
 
-  const institutionId = id != null ? Number(id) : NaN;
+  // 👉 load page data (institution + jobs)
+  useEffect(() => {
+    const loadPageData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [institutionRes, jobsRes] = await Promise.all([
+          getInstitution(institutionId),
+          getJobs({
+            page: 1,
+            perPage: 25,
+            sort: "-created_at",
+            filterInstitutionId: institutionId,
+          }),
+        ]);
+        setInstitution(institutionRes);
+        setJobs(jobsRes.data);
+      } catch (err: unknown) {
+        setError(getErrorMessage(err));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadPageData();
+  }, [institutionId]);
 
-  const {
-    data: institution,
-    isLoading: isInstitutionLoading,
-    error: institutionError,
-  } = useAsyncData(
-    async () => getInstitution(institutionId),
-    [institutionId]
-  );
+  // 👉 load dropdown data for edit form
+  useEffect(() => {
+    const loadFormData = async () => {
+      try {
+        const [typesRes, contactsRes] = await Promise.all([
+          getInstitutionTypes({ page: 1, perPage: 250, sort: "name" }),
+          getContacts({ page: 1, perPage: 250, sort: "last_name" }),
+        ]);
+        setInstitutionTypes(typesRes.data);
+        setContacts(contactsRes.data);
+      } catch {
+        // silently fail — dropdowns will just be empty
+      }
+    };
+    loadFormData();
+  }, []);
 
-  const { data: institutionTypesResponse } = useAsyncData(
-    async () => getInstitutionTypes({ page: 1, perPage: 250, sort: "name" }),
-    []
-  );
+  const handleEditSubmit = async ({ institution: payload, newContact }: InstitutionFormSubmitPayload) => {
+    setIsSubmitting(true);
+    try {
+      let primaryContactId = payload.primary_contact_id;
 
-  const { data: contactsResponse } = useAsyncData(
-    async () => getContacts({ page: 1, perPage: 250, sort: "last_name" }),
-    []
-  );
+      if (newContact) {
+        const createdContact = await createContact(newContact);
+        primaryContactId = createdContact.id;
+      }
 
-  const {
-    data: jobsResponse,
-    isLoading: isJobsLoading,
-    error: jobsError,
-  } = useAsyncData(
-    async () =>
-      getJobs({
-        page: 1,
-        perPage: 25,
-        sort: "-created_at",
-        filterInstitutionId: institutionId,
-      }),
-    [institutionId]
-  );
+      await updateInstitution(institutionId, {
+        ...payload,
+        primary_contact_id: primaryContactId,
+      });
 
-  const jobs = jobsResponse?.data ?? [];
-
-  const institutionTypes = institutionTypesResponse?.data ?? [];
-
-  const contacts = useMemo((): readonly Contact[] => {
-    return contactsResponse?.data ?? [];
-  }, [contactsResponse]);
-
-  type TaskRow = {
-    name: string;
-    status: string;
+      setIsEditDrawerOpen(false);
+      navigate(0);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-  type DocumentRow = {
-    name: string;
-    fileType: string;
-  };
-
-  const jobsColumns = useMemo(
-    () =>
-      [
-        {
-          id: "name",
-          header: "Job",
-          cell: (job: Job) => job.name,
-          cellClassName:
-            "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
-        },
-        {
-          id: "createdAt",
-          header: "Created",
-          cell: (job: Job) => job.created_at,
-          cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
-        },
-        {
-          id: "completedAt",
-          header: "Completed",
-          cell: (job: Job) => job.completed_at ?? "—",
-          cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
-        },
-      ] as const,
-    []
-  );
-
-  const tasksColumns = useMemo(
-    () =>
-      [
-        {
-          id: "name",
-          header: "Task",
-          cell: (row: TaskRow) => row.name,
-          cellClassName:
-            "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
-        },
-        {
-          id: "status",
-          header: "Status",
-          cell: (row: TaskRow) => row.status,
-          cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
-        },
-      ] as const,
-    []
-  );
-
-  const documentsColumns = useMemo(
-    () =>
-      [
-        {
-          id: "name",
-          header: "Document",
-          cell: (row: DocumentRow) => row.name,
-          cellClassName:
-            "whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900",
-        },
-        {
-          id: "fileType",
-          header: "File type",
-          cell: (row: DocumentRow) => row.fileType,
-          cellClassName: "whitespace-nowrap px-6 py-4 text-sm text-gray-600",
-        },
-      ] as const,
-    []
-  );
 
   return (
     <Layout title={institution?.name ?? "Institution"}>
@@ -152,7 +169,6 @@ export function InstitutionDetails() {
           onClose={() => {
             if (isSubmitting) return;
             setIsEditDrawerOpen(false);
-            setSubmitErrorMessage(null);
           }}
         >
           {institution ? (
@@ -169,43 +185,16 @@ export function InstitutionDetails() {
               contacts={contacts}
               submitLabel="Save"
               isSubmitting={isSubmitting}
-              errorMessage={submitErrorMessage ?? undefined}
-              onSubmit={async ({ institution: payload, newContact }) => {
-                setIsSubmitting(true);
-                setSubmitErrorMessage(null);
-
-                try {
-                  const primaryContactId = newContact
-                    ? (await createContact(newContact)).id
-                    : payload.primary_contact_id;
-
-                  await updateInstitution(institutionId, {
-                    ...payload,
-                    primary_contact_id: primaryContactId,
-                  });
-
-                  setIsEditDrawerOpen(false);
-                  navigate(0);
-                } catch (e: unknown) {
-                  const appError = isAppError(e) ? e : toAppError(e);
-                  setSubmitErrorMessage(getAppErrorMessage(appError));
-                  throw appError;
-                } finally {
-                  setIsSubmitting(false);
-                }
-              }}
+              onSubmit={handleEditSubmit}
             />
           ) : null}
         </Drawer>
 
-        {institutionError ? (
-          <div className="text-red-600">{getAppErrorMessage(institutionError)}</div>
-        ) : null}
-        {jobsError ? (
-          <div className="text-red-600">{getAppErrorMessage(jobsError)}</div>
+        {error ? (
+          <div className="text-red-600">{error}</div>
         ) : null}
 
-        {isInstitutionLoading ? (
+        {isLoading ? (
           <div>Loading…</div>
         ) : (
           <>
@@ -218,10 +207,7 @@ export function InstitutionDetails() {
                       type="button"
                       variant="secondary"
                       size="sm"
-                      onClick={() => {
-                        setIsEditDrawerOpen(true);
-                        setSubmitErrorMessage(null);
-                      }}
+                      onClick={() => setIsEditDrawerOpen(true)}
                     >
                       Edit
                     </ButtonStandard>
@@ -292,17 +278,13 @@ export function InstitutionDetails() {
               </div>
             </div>
 
-            {isJobsLoading ? (
-              <div>Loading jobs…</div>
-            ) : (
-              <DataTable
-                title="Associated jobs"
-                data={jobs}
-                columns={jobsColumns}
-                getRowKey={(job) => job.id}
-                onRowClick={(job) => navigate(`/jobs/${job.id}`)}
-              />
-            )}
+            <DataTable
+              title="Associated jobs"
+              data={jobs}
+              columns={jobsColumns}
+              getRowKey={(job) => job.id}
+              onRowClick={(job) => navigate(`/jobs/${job.id}`)}
+            />
 
             <DataTable<TaskRow>
               title="Tasks"

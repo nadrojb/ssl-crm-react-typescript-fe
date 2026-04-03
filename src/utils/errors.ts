@@ -27,3 +27,33 @@ export function mapValidationErrors<T extends string = string>(
 
     return result;
 }
+
+export function getErrorMessage(err: unknown): string {
+    if (typeof err !== "object" || err === null) {
+        return "Something went wrong";
+    }
+
+    const error = err as Record<string, unknown>;
+
+    if (error.type === "validation") {
+        return "Please fix the errors below.";
+    }
+
+    if (error.type === "server") {
+        const status = typeof error.status === "number" ? error.status : 500;
+        if (status >= 400 && status < 500 && typeof error.message === "string") {
+            return error.message;
+        }
+        return "Something went wrong. Please try again.";
+    }
+
+    if (error.type === "network") {
+        return "Network error. Please check your connection.";
+    }
+
+    if (err instanceof Error) {
+        return err.message;
+    }
+
+    return "Something went wrong";
+}
