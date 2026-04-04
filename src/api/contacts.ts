@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import { toAppError, type AppError } from "./errorHandler";
+import { toAppError } from "./errorHandler";
 import {
   ContactsListResponseSchema,
   ContactResponseSchema,
@@ -15,43 +15,28 @@ export async function getContacts(params?: {
   filterName?: string;
 }): Promise<ContactsListResponse> {
   try {
-    const queryParams: Record<string, string | number> = {};
-
-    if (params?.page != null) {
-      queryParams.page = params.page;
-    }
-
-    if (params?.perPage != null) {
-      queryParams.per_page = params.perPage;
-    }
-
-    if (params?.sort != null && params.sort.trim().length > 0) {
-      queryParams.sort = params.sort;
-    }
-
-    if (params?.filterName != null && params.filterName.trim().length > 0) {
-      queryParams["filter[name]"] = params.filterName;
-    }
-
     const response = await apiClient.get("/contacts", {
-      params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+      params: {
+        page: params?.page,
+        per_page: params?.perPage,
+        sort: params?.sort,
+        "filter[name]": params?.filterName,
+      },
     });
 
     return ContactsListResponseSchema.parse(response.data);
-  } catch (error: unknown) {
-    const appError: AppError = toAppError(error);
-    throw appError;
+  } catch (error) {
+    throw toAppError(error);
   }
 }
 
 export async function createContact(
-  payload: CreateContactRequest
+    payload: CreateContactRequest
 ): Promise<Contact> {
   try {
     const response = await apiClient.post("/contacts", payload);
     return ContactResponseSchema.parse(response.data).data;
-  } catch (error: unknown) {
-    const appError: AppError = toAppError(error);
-    throw appError;
+  } catch (error) {
+    throw toAppError(error);
   }
 }

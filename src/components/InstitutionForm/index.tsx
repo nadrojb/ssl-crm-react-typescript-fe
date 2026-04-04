@@ -8,13 +8,10 @@ import { mapValidationErrors, type FieldErrors } from "../../utils/errors";
 import { isAppError, toAppError } from "../../api/errorHandler";
 import {
   CreateInstitutionRequestSchema,
+  NewContactPayloadSchema,
   type CreateInstitutionRequest,
 } from "../../api/schemas/institution-requests";
-import {
-  CreateContactRequestSchema,
-  type CreateContactRequest,
-  type Contact,
-} from "../../api/schemas/contact";
+import type { Contact } from "../../api/schemas/contact";
 import type { InstitutionType } from "../../api/institution-types";
 
 type PrimaryContactMode = "existing" | "new";
@@ -22,7 +19,7 @@ type PrimaryContactMode = "existing" | "new";
 type InstitutionFormFields =
   | "name"
   | "type_id"
-  | "primary_contact_id"
+  | "contact_id"
   | "service_due_at"
   | "service_booked_at"
   | "remedials_booked_at"
@@ -48,13 +45,10 @@ type InstitutionFormValues = {
 
 export type InstitutionFormSubmitPayload = {
   institution: CreateInstitutionRequest;
-  newContact: CreateContactRequest | null;
 };
 
 type InstitutionFormProps = {
-  initialValues?: Partial<CreateInstitutionRequest> & {
-    primary_contact_id?: number | null;
-  };
+  initialValues?: Partial<CreateInstitutionRequest>;
   institutionTypes: readonly InstitutionType[];
   contacts: readonly Contact[];
   submitLabel: string;
@@ -97,10 +91,12 @@ export const InstitutionForm = ({
     service_booked_at: initialValues?.service_booked_at ?? "",
     remedials_booked_at: initialValues?.remedials_booked_at ?? "",
     primaryContactMode:
-      initialValues?.primary_contact_id != null ? "existing" : "existing",
+      initialValues?.contact != null && "id" in initialValues.contact
+        ? "existing"
+        : "existing",
     existingPrimaryContactId:
-      initialValues?.primary_contact_id != null
-        ? String(initialValues.primary_contact_id)
+      initialValues?.contact != null && "id" in initialValues.contact
+        ? String(initialValues.contact.id)
         : "",
     contactFirstName: "",
     contactLastName: "",
@@ -139,7 +135,7 @@ export const InstitutionForm = ({
 
   const setPrimaryContactMode = (mode: PrimaryContactMode) => {
     setValues((prev) => ({ ...prev, primaryContactMode: mode }));
-    setFieldErrors((prev) => ({ ...prev, primary_contact_id: undefined }));
+    setFieldErrors((prev) => ({ ...prev, contact_id: undefined }));
   };
 
   const validatePayload = (
@@ -148,14 +144,13 @@ export const InstitutionForm = ({
     const nextErrors: FieldErrors<InstitutionFormFields> = {};
 
     try {
-      CreateInstitutionRequestSchema.parse(payload.institution);
+      CreateInstitutionRequestSchema.omit({ contact: true }).parse(payload.institution);
     } catch (e: unknown) {
       if (e instanceof ZodError) {
         for (const issue of e.issues) {
           const path = issue.path[0];
           if (path === "name") nextErrors.name = issue.message;
           if (path === "type_id") nextErrors.type_id = issue.message;
-          if (path === "primary_contact_id") nextErrors.primary_contact_id = issue.message;
           if (path === "service_due_at") nextErrors.service_due_at = "Invalid date";
           if (path === "service_booked_at") nextErrors.service_booked_at = "Invalid date";
           if (path === "remedials_booked_at") nextErrors.remedials_booked_at = "Invalid date";
@@ -163,9 +158,10 @@ export const InstitutionForm = ({
       }
     }
 
-    if (payload.newContact) {
+    const { contact } = payload.institution;
+    if (contact !== null && "first_name" in contact) {
       try {
-        CreateContactRequestSchema.parse(payload.newContact);
+        NewContactPayloadSchema.parse(contact);
       } catch (e: unknown) {
         if (e instanceof ZodError) {
           for (const issue of e.issues) {
@@ -183,39 +179,32 @@ export const InstitutionForm = ({
   };
 
   const buildSubmitPayload = (): InstitutionFormSubmitPayload => {
-    const baseInstitution: CreateInstitutionRequest = {
-      name: values.name.trim(),
-      primary_contact_id: null,
-      type_id: toNullableNumber(values.type_id),
-      service_due_at: toNullableDateString(values.service_due_at),
-      service_booked_at: toNullableDateString(values.service_booked_at),
-      remedials_booked_at: toNullableDateString(values.remedials_booked_at),
-    };
+    const existingContactId = toNullableNumber(values.existingPrimaryContactId);
 
-    if (values.primaryContactMode === "existing") {
-      return {
-        institution: {
-          ...baseInstitution,
-          primary_contact_id: toNullableNumber(values.existingPrimaryContactId),
-        },
-        newContact: null,
-      };
-    }
-
-    const newContact: CreateContactRequest = {
-      first_name: values.contactFirstName.trim(),
-      last_name: values.contactLastName.trim(),
-      email: values.contactEmail.trim().toLowerCase(),
-      phone_number:
-        values.contactPhoneNumber.trim().length > 0
-          ? values.contactPhoneNumber.trim()
-          : null,
-      crm_job_id: null,
-    };
+    const contact =
+      values.primaryContactMode === "existing"
+        ? existingContactId !== null
+          ? { id: existingContactId }
+          : null
+        : {
+            first_name: values.contactFirstName.trim(),
+            last_name: values.contactLastName.trim(),
+            email: values.contactEmail.trim().toLowerCase(),
+            phone_number:
+              values.contactPhoneNumber.trim().length > 0
+                ? values.contactPhoneNumber.trim()
+                : null,
+          };
 
     return {
-      institution: baseInstitution,
-      newContact,
+      institution: {
+        name: values.name.trim(),
+        contact,
+        type_id: toNullableNumber(values.type_id),
+        service_due_at: toNullableDateString(values.service_due_at),
+        service_booked_at: toNullableDateString(values.service_booked_at),
+        remedials_booked_at: toNullableDateString(values.remedials_booked_at),
+      },
     };
   };
 
@@ -335,8 +324,8 @@ export const InstitutionForm = ({
                 </option>
               ))}
             </select>
-            {fieldErrors.primary_contact_id ? (
-              <p className="text-sm text-red-600">{fieldErrors.primary_contact_id}</p>
+            {fieldErrors.contact_id ? (
+              <p className="text-sm text-red-600">{fieldErrors.contact_id}</p>
             ) : null}
           </div>
         ) : (

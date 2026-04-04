@@ -10,7 +10,6 @@ import InstitutionDetails from "./pages/Institutions/institution-details";
 import InstitutionCreate from "./pages/Institutions/institution-create";
 import Calendar from "./pages/Calendar";
 import Tasks from "./pages/Tasks";
-import Contacts from "./pages/Contacts";
 import JobCreate from "./pages/Jobs/job-create.tsx";
 
 function App() {
@@ -35,8 +34,6 @@ function App() {
           <Route path="/calendar" element={<ProtectedRoute><Calendar/></ProtectedRoute>}/>
 
           <Route path="/tasks" element={<ProtectedRoute><Tasks/></ProtectedRoute>}/>
-
-          <Route path="/contacts" element={<ProtectedRoute><Contacts/></ProtectedRoute>}/>
 
           <Route
             path="*"

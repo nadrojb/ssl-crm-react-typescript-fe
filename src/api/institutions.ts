@@ -1,28 +1,35 @@
+// src/api/institutions.ts
+
 import { apiClient } from "./client";
 import { z } from "zod";
-import { toAppError, type AppError } from "./errorHandler";
+import { toAppError } from "./errorHandler";
 import { InstitutionSchema } from "./schemas/institution";
 import {
     type CreateInstitutionRequest,
     type UpdateInstitutionRequest,
 } from "./schemas/institution-requests";
 
+// -----------------------------
+// Schemas
+// -----------------------------
 export const InstitutionsListResponseSchema = z.object({
     data: z.array(InstitutionSchema),
-    links: z.unknown().optional(),
-    meta: z.unknown().optional(),
 });
-
-export type InstitutionsListResponse = z.infer<
-    typeof InstitutionsListResponseSchema
->;
 
 export const InstitutionResponseSchema = z.object({
     data: InstitutionSchema,
 });
 
+// -----------------------------
+// Types
+// -----------------------------
+export type InstitutionsListResponse = z.infer<typeof InstitutionsListResponseSchema>;
 export type InstitutionResponse = z.infer<typeof InstitutionResponseSchema>;
+export type Institution = z.infer<typeof InstitutionSchema>;
 
+// -----------------------------
+// API functions
+// -----------------------------
 export async function getInstitutions(params?: {
     page?: number;
     perPage?: number;
@@ -31,70 +38,36 @@ export async function getInstitutions(params?: {
     filterTypeId?: number;
 }): Promise<InstitutionsListResponse> {
     try {
-        const queryParams: Record<string, string | number> = {};
-
-        if (params?.page != null) {
-            queryParams.page = params.page;
-        }
-
-        if (params?.perPage != null) {
-            queryParams.per_page = params.perPage;
-        }
-
-        if (params?.sort != null && params.sort.trim().length > 0) {
-            queryParams.sort = params.sort;
-        }
-
-        if (params?.filterName != null && params.filterName.trim().length > 0) {
-            queryParams["filter[name]"] = params.filterName;
-        }
-
-        if (params?.filterTypeId != null) {
-            queryParams["filter[type_id]"] = params.filterTypeId;
-        }
-
-        const response = await apiClient.get("/institutions", {
-            params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
-        });
-
+        const response = await apiClient.get("/institutions", { params });
         return InstitutionsListResponseSchema.parse(response.data);
     } catch (error: unknown) {
-        const appError: AppError = toAppError(error);
-        throw appError;
+        throw toAppError(error);
     }
 }
 
-export async function getInstitution(id: number) {
+export async function getInstitution(id: number): Promise<Institution> {
     try {
         const response = await apiClient.get(`/institutions/${id}`);
         return InstitutionResponseSchema.parse(response.data).data;
     } catch (error: unknown) {
-        const appError: AppError = toAppError(error);
-        throw appError;
+        throw toAppError(error);
     }
 }
 
-export async function createInstitution(
-    payload: CreateInstitutionRequest
-): Promise<z.infer<typeof InstitutionSchema>> {
+export async function createInstitution(payload: CreateInstitutionRequest): Promise<Institution> {
     try {
         const response = await apiClient.post("/institutions", payload);
         return InstitutionResponseSchema.parse(response.data).data;
     } catch (error: unknown) {
-        const appError: AppError = toAppError(error);
-        throw appError;
+        throw toAppError(error);
     }
 }
 
-export async function updateInstitution(
-    id: number,
-    payload: UpdateInstitutionRequest
-): Promise<z.infer<typeof InstitutionSchema>> {
+export async function updateInstitution(id: number, payload: UpdateInstitutionRequest): Promise<Institution> {
     try {
         const response = await apiClient.patch(`/institutions/${id}`, payload);
         return InstitutionResponseSchema.parse(response.data).data;
     } catch (error: unknown) {
-        const appError: AppError = toAppError(error);
-        throw appError;
+        throw toAppError(error);
     }
 }

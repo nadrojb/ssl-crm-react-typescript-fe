@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { createContact, getContacts } from "../../api/contacts";
+import { getContacts } from "../../api/contacts";
 import { createInstitution } from "../../api/institutions";
 import { getInstitutionTypes, type InstitutionType } from "../../api/institution-types";
 import type { Contact } from "../../api/schemas/contact";
@@ -20,14 +20,13 @@ export const InstitutionCreate = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
-  // 👉 load data on page load
   useEffect(() => {
     const loadData = async () => {
       try {
-        const typesRes = await getInstitutionTypes({ page: 1, perPage: 250 });
+        const institutionTypesRes = await getInstitutionTypes({ page: 1, perPage: 250 });
         const contactsRes = await getContacts({ page: 1, perPage: 250 });
 
-        setInstitutionTypes(typesRes.data);
+        setInstitutionTypes(institutionTypesRes.data);
         setContacts(contactsRes.data);
       } catch (err: unknown) {
         setError(getErrorMessage(err));
@@ -37,26 +36,12 @@ export const InstitutionCreate = () => {
     loadData();
   }, []);
 
-  const handleSubmit = async ({ institution, newContact }: InstitutionFormSubmitPayload) => {
+  const handleSubmit = async ({ institution }: InstitutionFormSubmitPayload) => {
     setIsSubmitting(true);
     setError(undefined);
 
     try {
-      let primaryContactId = institution.primary_contact_id;
-
-      // 👉 create contact if needed
-      if (newContact) {
-        const createdContact = await createContact(newContact);
-        primaryContactId = createdContact.id;
-      }
-
-      // 👉 create institution
-      const createdInstitution = await createInstitution({
-        ...institution,
-        primary_contact_id: primaryContactId,
-      });
-
-      // 👉 redirect
+      const createdInstitution = await createInstitution(institution);
       navigate(`/institutions/${createdInstitution.id}`);
     } catch (err: unknown) {
       setError(getErrorMessage(err));

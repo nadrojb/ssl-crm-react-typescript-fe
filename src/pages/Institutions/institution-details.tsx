@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { createContact, getContacts } from "../../api/contacts";
+import { getContacts } from "../../api/contacts";
 import { getInstitutionTypes, type InstitutionType } from "../../api/institution-types";
 import { getInstitution, updateInstitution } from "../../api/institutions";
 import { getJobs, type Job } from "../../api/jobs";
@@ -138,21 +138,10 @@ export function InstitutionDetails() {
     loadFormData();
   }, []);
 
-  const handleEditSubmit = async ({ institution: payload, newContact }: InstitutionFormSubmitPayload) => {
+  const handleEditSubmit = async ({ institution: payload }: InstitutionFormSubmitPayload) => {
     setIsSubmitting(true);
     try {
-      let primaryContactId = payload.primary_contact_id;
-
-      if (newContact) {
-        const createdContact = await createContact(newContact);
-        primaryContactId = createdContact.id;
-      }
-
-      await updateInstitution(institutionId, {
-        ...payload,
-        primary_contact_id: primaryContactId,
-      });
-
+      await updateInstitution(institutionId, payload);
       setIsEditDrawerOpen(false);
       navigate(0);
     } finally {
@@ -175,7 +164,9 @@ export function InstitutionDetails() {
             <InstitutionForm
               initialValues={{
                 name: institution.name,
-                primary_contact_id: institution.primary_contact?.id ?? null,
+                contact: institution.primary_contact
+                  ? { id: institution.primary_contact.id }
+                  : null,
                 type_id: institution.type?.id ?? null,
                 service_due_at: institution.service_due_at,
                 service_booked_at: institution.service_booked_at,

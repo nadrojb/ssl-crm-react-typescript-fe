@@ -1,33 +1,35 @@
 import { z } from "zod";
-
 import { apiClient } from "./client";
 
+// Types
 export type LoginPayload = {
     email: string;
     password: string;
 };
 
-const AuthUserSchema = z.object({
+// Schemas
+const UserSchema = z.object({
     id: z.number().int(),
     name: z.string(),
     email: z.string().email(),
 });
 
-export type User = z.infer<typeof AuthUserSchema>;
+export type User = z.infer<typeof UserSchema>;
 
 const LoginResponseSchema = z.object({
     token: z.string(),
-    user: AuthUserSchema,
+    user: UserSchema,
 });
 
 export type LoginResponse = z.infer<typeof LoginResponseSchema>;
 
 const MeResponseSchema = z.object({
-    data: AuthUserSchema,
+    data: UserSchema,
 });
 
-type MeResponse = z.infer<typeof MeResponseSchema>;
+export type MeResponse = z.infer<typeof MeResponseSchema>;
 
+// API functions
 export async function loginUser(payload: LoginPayload): Promise<LoginResponse> {
     const response = await apiClient.post("/login", payload);
     return LoginResponseSchema.parse(response.data);
