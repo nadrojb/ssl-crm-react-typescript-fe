@@ -17,7 +17,7 @@ export function useAsyncData<T>(
   deps: readonly unknown[]
 ): UseAsyncDataResult<T> {
   const [data, setData] = useState<T | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<AppError | null>(null);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export function useAsyncData<T>(
         if (isMounted) {
           setData(result);
         }
-      } catch (e: unknown) {
+      } catch (e) {
         if (isMounted) {
           setError(isAppError(e) ? e : toAppError(e));
         }

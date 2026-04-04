@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { ZodError } from "zod";
+ 
 
 import { ButtonStandard } from "../ButtonStandard";
 import { FormError } from "../FormError";
@@ -75,6 +75,19 @@ const getContactLabel = (contact: Contact): string => {
   return contact.email ? `${name} (${contact.email})` : name;
 };
 
+const compareContactsByName = (a: Contact, b: Contact): number => {
+  const aKey = `${a.last_name} ${a.first_name}`.toLowerCase();
+  const bKey = `${b.last_name} ${b.first_name}`.toLowerCase();
+  return aKey.localeCompare(bKey);
+};
+
+const toContactOption = (contact: Contact) => {
+  return {
+    value: String(contact.id),
+    label: getContactLabel(contact),
+  };
+};
+
 export const InstitutionForm = ({
   initialValues,
   institutionTypes,
@@ -109,22 +122,10 @@ export const InstitutionForm = ({
     FieldErrors<InstitutionFormFields>
   >({});
 
-  const contactOptions = contacts
-    .slice()
-    .sort((a, b) => {
-      const aKey = `${a.last_name} ${a.first_name}`.toLowerCase();
-      const bKey = `${b.last_name} ${b.first_name}`.toLowerCase();
-      return aKey.localeCompare(bKey);
-    })
-    .map((contact) => ({
-      value: String(contact.id),
-      label: getContactLabel(contact),
-    }));
+  const contactOptions = [...contacts].sort(compareContactsByName).map(toContactOption);
 
   const handleChange = (
-    e:
-      | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
 
@@ -144,34 +145,27 @@ export const InstitutionForm = ({
   ): FieldErrors<InstitutionFormFields> => {
     const nextErrors: FieldErrors<InstitutionFormFields> = {};
 
-    try {
-      CreateInstitutionRequestSchema.omit({ contact: true }).parse(payload.institution);
-    } catch (e: unknown) {
-      if (e instanceof ZodError) {
-        for (const issue of e.issues) {
-          const path = issue.path[0];
-          if (path === "name") nextErrors.name = issue.message;
-          if (path === "type_id") nextErrors.type_id = issue.message;
-          if (path === "service_due_at") nextErrors.service_due_at = "Invalid date";
-          if (path === "service_booked_at") nextErrors.service_booked_at = "Invalid date";
-          if (path === "remedials_booked_at") nextErrors.remedials_booked_at = "Invalid date";
-        }
+    const institutionResult = CreateInstitutionRequestSchema.omit({ contact: true }).safeParse(
+      payload.institution
+    );
+    if (!institutionResult.success) {
+      for (const issue of institutionResult.error.issues) {
+        const path = issue.path[0];
+        if (path === "name") nextErrors.name = issue.message;
+        if (path === "type_id") nextErrors.type_id = issue.message;
       }
     }
 
     const { contact } = payload.institution;
     if (contact !== null && "first_name" in contact) {
-      try {
-        NewContactPayloadSchema.parse(contact);
-      } catch (e: unknown) {
-        if (e instanceof ZodError) {
-          for (const issue of e.issues) {
-            const path = issue.path[0];
-            if (path === "first_name") nextErrors.first_name = issue.message;
-            if (path === "last_name") nextErrors.last_name = issue.message;
-            if (path === "email") nextErrors.email = issue.message;
-            if (path === "phone_number") nextErrors.phone_number = issue.message;
-          }
+      const contactResult = NewContactPayloadSchema.safeParse(contact);
+      if (!contactResult.success) {
+        for (const issue of contactResult.error.issues) {
+          const path = issue.path[0];
+          if (path === "first_name") nextErrors.first_name = issue.message;
+          if (path === "last_name") nextErrors.last_name = issue.message;
+          if (path === "email") nextErrors.email = issue.message;
+          if (path === "phone_number") nextErrors.phone_number = issue.message;
         }
       }
     }

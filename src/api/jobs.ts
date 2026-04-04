@@ -12,6 +12,7 @@ import {
     type InstitutionType,
     type PrimaryContact,
 } from "./schemas/institution";
+import type {CreateJobRequest} from "./schemas/job-requests.ts";
 
 // Re-exports
 export { InstitutionSchema, type Institution, type InstitutionType, type PrimaryContact };
@@ -59,6 +60,15 @@ export async function getJobs(params?: {
 export async function getJob(id: number): Promise<JobDetails> {
     try {
         const response = await apiClient.get(`/jobs/${id}`);
+        return JobResponseSchema.parse(response.data).data;
+    } catch (error) {
+        throw toAppError(error);
+    }
+}
+
+export async function createJob(payload: CreateJobRequest): Promise<JobDetails> {
+    try {
+        const response = await apiClient.post("/jobs", payload);
         return JobResponseSchema.parse(response.data).data;
     } catch (error) {
         throw toAppError(error);
