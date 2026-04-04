@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { ZodError } from "zod";
 
 import { ButtonStandard } from "../ButtonStandard";
@@ -84,6 +84,7 @@ export const InstitutionForm = ({
   errorMessage,
   onSubmit,
 }: InstitutionFormProps) => {
+  const formRef = useRef<HTMLFormElement | null>(null);
   const [values, setValues] = useState<InstitutionFormValues>({
     name: initialValues?.name ?? "",
     type_id: initialValues?.type_id != null ? String(initialValues.type_id) : "",
@@ -239,7 +240,7 @@ export const InstitutionForm = ({
   };
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+    <form ref={formRef} className="space-y-6" onSubmit={handleSubmit} noValidate>
       <FormError error={errorMessage || fieldErrors.submit} />
 
       <TextInput
@@ -260,7 +261,7 @@ export const InstitutionForm = ({
           name="type_id"
           value={values.type_id}
           onChange={handleChange}
-          className="block w-full rounded-sm border-0 bg-white py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-blue-500 sm:text-sm"
+          className="block w-full rounded-sm border-0 bg-white py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-blue-500 sm:text-sm cursor-pointer"
         >
           <option value="">No type</option>
           {institutionTypes.map((type) => (
@@ -282,7 +283,7 @@ export const InstitutionForm = ({
         <div className="flex gap-3">
           <button
             type="button"
-            className={`rounded-md px-3 py-2 text-sm ring-1 ring-inset ${
+            className={`rounded-md px-3 py-2 text-sm ring-1 ring-inset cursor-pointer ${
               values.primaryContactMode === "existing"
                 ? "bg-blue-50 text-blue-700 ring-blue-200"
                 : "bg-white text-gray-700 ring-gray-200"
@@ -294,7 +295,7 @@ export const InstitutionForm = ({
           </button>
           <button
             type="button"
-            className={`rounded-md px-3 py-2 text-sm ring-1 ring-inset ${
+            className={`rounded-md px-3 py-2 text-sm ring-1 ring-inset cursor-pointer ${
               values.primaryContactMode === "new"
                 ? "bg-blue-50 text-blue-700 ring-blue-200"
                 : "bg-white text-gray-700 ring-gray-200"
@@ -315,7 +316,7 @@ export const InstitutionForm = ({
               name="existingPrimaryContactId"
               value={values.existingPrimaryContactId}
               onChange={handleChange}
-              className="block w-full rounded-sm border-0 bg-white py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-blue-500 sm:text-sm"
+              className="block w-full rounded-sm border-0 bg-white py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-blue-500 sm:text-sm cursor-pointer"
             >
               <option value="">No primary contact</option>
               {contactOptions.map((opt) => (
@@ -402,7 +403,11 @@ export const InstitutionForm = ({
       </div>
 
       <div className="flex justify-end">
-        <ButtonStandard type="submit" isLoading={isSubmitting}>
+        <ButtonStandard
+          type="button"
+          isLoading={isSubmitting}
+          onClick={() => formRef.current?.requestSubmit()}
+        >
           {submitLabel}
         </ButtonStandard>
       </div>

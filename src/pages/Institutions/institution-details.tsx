@@ -141,9 +141,9 @@ export function InstitutionDetails() {
   const handleEditSubmit = async ({ institution: payload }: InstitutionFormSubmitPayload) => {
     setIsSubmitting(true);
     try {
-      await updateInstitution(institutionId, payload);
+      const updatedInstitution = await updateInstitution(institutionId, payload);
+      setInstitution(updatedInstitution);
       setIsEditDrawerOpen(false);
-      navigate(0);
     } finally {
       setIsSubmitting(false);
     }
@@ -189,21 +189,18 @@ export function InstitutionDetails() {
           <div>Loading…</div>
         ) : (
           <>
+            <div className="mb-4 flex items-start justify-end">
+              <ButtonStandard
+                  type="button"
+                  size="sm"
+                  onClick={() => setIsEditDrawerOpen(true)}
+              >
+                Edit
+              </ButtonStandard>
+            </div>
             <div className="flex flex-col gap-6 lg:flex-row">
               <div className="w-full lg:w-1/2">
-                <Card
-                  title="Overview"
-                  rightSlot={
-                    <ButtonStandard
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => setIsEditDrawerOpen(true)}
-                    >
-                      Edit
-                    </ButtonStandard>
-                  }
-                >
+                <Card title="Overview">
                   <div className="space-y-4">
                     <div>
                       <div className="text-xs uppercase tracking-wide text-gray-500">
