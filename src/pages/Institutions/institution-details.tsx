@@ -14,6 +14,7 @@ import { DataTable } from "../../components/DataTable";
 import { InstitutionForm, type InstitutionFormSubmitPayload } from "../../components/InstitutionForm";
 import { Layout } from "../../components/Layout";
 import { ButtonStandard } from "../../components/ButtonStandard";
+import { ConfirmModal } from "../../components/ConfirmModal";
 
 type TaskRow = {
   name: string;
@@ -94,8 +95,8 @@ export function InstitutionDetails() {
 
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
-  // 👉 load page data (institution + jobs)
   useEffect(() => {
     const loadPageData = async () => {
       setIsLoading(true);
@@ -121,7 +122,6 @@ export function InstitutionDetails() {
     loadPageData();
   }, [institutionId]);
 
-  // 👉 load dropdown data for edit form
   useEffect(() => {
     const loadFormData = async () => {
       try {
@@ -151,6 +151,15 @@ export function InstitutionDetails() {
 
   return (
     <Layout title={institution?.name ?? "Institution"}>
+      <ConfirmModal
+          isOpen={isConfirmModalOpen}
+          title="Confirm Archive"
+          message="Are you sure you want to archive this institution?"
+          onClose={() => setIsConfirmModalOpen(false)}
+          onConfirm={() => {
+            setIsConfirmModalOpen(false);
+          }}
+      />
       <div className="space-y-6">
         <Drawer
           isOpen={isEditDrawerOpen}
@@ -189,13 +198,21 @@ export function InstitutionDetails() {
           <div>Loading…</div>
         ) : (
           <>
-            <div className="mb-4 flex items-start justify-end">
+            <div className="mb-4 flex items-start justify-end gap-3">
               <ButtonStandard
                   type="button"
                   size="sm"
                   onClick={() => setIsEditDrawerOpen(true)}
               >
                 Edit
+              </ButtonStandard>
+              <ButtonStandard
+                  type="button"
+                  size="sm"
+                  variant="dark"
+                  onClick={() => setIsConfirmModalOpen(true)}
+              >
+                Archive
               </ButtonStandard>
             </div>
             <div className="flex flex-col gap-6 lg:flex-row">
