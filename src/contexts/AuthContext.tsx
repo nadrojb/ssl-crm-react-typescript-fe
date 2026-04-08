@@ -75,12 +75,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsReady(true);
   };
 
-  const value = useMemo<AuthContextType>(() => {
+  const value = useMemo(() => {
     return { user, isReady, login, logout };
   }, [user, isReady]);
 
   return (
     <AuthContext.Provider value={value}>
+
+
       {children}
     </AuthContext.Provider>
   );

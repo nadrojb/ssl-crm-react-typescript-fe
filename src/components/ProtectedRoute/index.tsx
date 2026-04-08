@@ -1,9 +1,9 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 
-interface ProtectedRouteProps {
+type ProtectedRouteProps = {
   children: React.ReactNode;
-}
+};
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, isReady } = useAuth();

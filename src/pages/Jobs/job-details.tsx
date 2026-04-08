@@ -67,7 +67,7 @@ export function JobDetails() {
       try {
         const res = await getJob(jobId);
         setJob(res);
-      } catch (err: unknown) {
+      } catch (err) {
         setError(getErrorMessage(err));
       } finally {
         setIsLoading(false);

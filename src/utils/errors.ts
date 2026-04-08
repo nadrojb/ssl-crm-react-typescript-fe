@@ -1,27 +1,13 @@
-// src/utils/errors.ts
+import { isAppError } from "../api/errorHandler";
 
-/**
- * Generic field error map used by forms
- */
-export type FieldErrors<T extends string = string> = Partial<
-    Record<T, string>
->;
-
-/**
- * Converts backend validation errors:
- * { email: ["Invalid email"] }
- *
- * Into:
- * { email: "Invalid email" }
- */
-export function mapValidationErrors<T extends string = string>(
+export function mapValidationErrors(
     errors: Record<string, string[]>
-): FieldErrors<T> {
-    const result: FieldErrors<T> = {};
+): Record<string, string> {
+    const result: Record<string, string> = {};
 
     for (const [key, messages] of Object.entries(errors)) {
         if (Array.isArray(messages) && messages.length > 0) {
-            result[key as T] = messages[0];
+            result[key] = messages[0];
         }
     }
 
@@ -29,30 +15,25 @@ export function mapValidationErrors<T extends string = string>(
 }
 
 export function getErrorMessage(err: unknown): string {
-    if (typeof err !== "object" || err === null) {
+    if (!isAppError(err)) {
+        if (err instanceof Error) return err.message;
         return "Something went wrong";
     }
 
-    const error = err as Record<string, unknown>;
-
-    if (error.type === "validation") {
+    if (err.type === "validation") {
         return "Please fix the errors below.";
     }
 
-    if (error.type === "server") {
-        const status = typeof error.status === "number" ? error.status : 500;
-        if (status >= 400 && status < 500 && typeof error.message === "string") {
-            return error.message;
+    if (err.type === "server") {
+        const status = err.status ?? 500;
+        if (status >= 400 && status < 500 && err.message) {
+            return err.message;
         }
         return "Something went wrong. Please try again.";
     }
 
-    if (error.type === "network") {
+    if (err.type === "network") {
         return "Network error. Please check your connection.";
-    }
-
-    if (err instanceof Error) {
-        return err.message;
     }
 
     return "Something went wrong";

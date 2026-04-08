@@ -112,7 +112,7 @@ export function InstitutionDetails() {
         ]);
         setInstitution(institutionRes);
         setJobs(jobsRes.data);
-      } catch (err: unknown) {
+      } catch (err) {
         setError(getErrorMessage(err));
       } finally {
         setIsLoading(false);

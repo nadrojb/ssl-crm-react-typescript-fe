@@ -1,10 +1,10 @@
 import { Menu, Bell } from "lucide-react";
 import type { ReactNode } from "react";
 
-interface HeaderProps {
+type HeaderProps = {
   onMenuClick: () => void;
   title: ReactNode;
-}
+};
 
 export function Header({ onMenuClick, title }: HeaderProps) {
   return (

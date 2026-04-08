@@ -2,10 +2,10 @@ import { useState, type ReactNode } from "react";
 import { Sidebar } from "../Sidebar";
 import { Header } from "../Header";
 
-interface LayoutProps {
+type LayoutProps = {
   children: ReactNode;
   title?: ReactNode;
-}
+};
 
 export function Layout({ children, title }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);

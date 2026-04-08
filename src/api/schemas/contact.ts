@@ -8,8 +8,8 @@ export const ContactSchema = z.object({
   last_name: z.string(),
   email: z.string(),
   phone_number: NullableStringSchema,
-  created_at: z.union([z.string(), z.null()]).optional(),
-  updated_at: z.union([z.string(), z.null()]).optional(),
+  created_at: z.string().nullable().optional(),
+  updated_at: z.string().nullable().optional(),
 });
 
 export type Contact = z.infer<typeof ContactSchema>;

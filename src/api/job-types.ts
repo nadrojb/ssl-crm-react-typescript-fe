@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import { toAppError, type AppError } from "./errorHandler";
+import { toAppError } from "./errorHandler";
 import { z } from "zod";
 
 export const JobTypeSchema = z.object({
@@ -34,8 +34,7 @@ export async function getJobTypes(parameters?: {
         })
 
         return JobTypesListResponseSchema.parse(response.data);
-    } catch (error: unknown) {
-        const appError: AppError = toAppError(error);
-        throw appError;
+    } catch (error) {
+        throw toAppError(error);
     }
 }

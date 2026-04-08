@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 
-interface StatCardProps {
+type StatCardProps = {
   title: string;
   value: string | number;
   icon: ReactNode;
   trend?: string;
-}
+};
 
 export function StatCard({ title, value, icon, trend }: StatCardProps) {
   return (

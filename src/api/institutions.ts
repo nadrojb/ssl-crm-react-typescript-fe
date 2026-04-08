@@ -9,9 +9,6 @@ import {
     type UpdateInstitutionRequest,
 } from "./schemas/institution-requests";
 
-// -----------------------------
-// Schemas
-// -----------------------------
 export const InstitutionsListResponseSchema = z.object({
     data: z.array(InstitutionSchema),
 });
@@ -20,16 +17,10 @@ export const InstitutionResponseSchema = z.object({
     data: InstitutionSchema,
 });
 
-// -----------------------------
-// Types
-// -----------------------------
 export type InstitutionsListResponse = z.infer<typeof InstitutionsListResponseSchema>;
 export type InstitutionResponse = z.infer<typeof InstitutionResponseSchema>;
 export type Institution = z.infer<typeof InstitutionSchema>;
 
-// -----------------------------
-// API functions
-// -----------------------------
 export async function getInstitutions(params?: {
     page?: number;
     perPage?: number;
@@ -40,34 +31,34 @@ export async function getInstitutions(params?: {
     try {
         const response = await apiClient.get("/institutions", { params });
         return InstitutionsListResponseSchema.parse(response.data);
-    } catch (error: unknown) {
+    } catch (error) {
         throw toAppError(error);
     }
 }
 
-export async function getInstitution(id: number): Promise<Institution> {
+export async function getInstitution(id: number) {
     try {
         const response = await apiClient.get(`/institutions/${id}`);
         return InstitutionResponseSchema.parse(response.data).data;
-    } catch (error: unknown) {
+    } catch (error) {
         throw toAppError(error);
     }
 }
 
-export async function createInstitution(payload: CreateInstitutionRequest): Promise<Institution> {
+export async function createInstitution(payload: CreateInstitutionRequest) {
     try {
         const response = await apiClient.post("/institutions", payload);
         return InstitutionResponseSchema.parse(response.data).data;
-    } catch (error: unknown) {
+    } catch (error) {
         throw toAppError(error);
     }
 }
 
-export async function updateInstitution(id: number, payload: UpdateInstitutionRequest): Promise<Institution> {
+export async function updateInstitution(id: number, payload: UpdateInstitutionRequest) {
     try {
         const response = await apiClient.patch(`/institutions/${id}`, payload);
         return InstitutionResponseSchema.parse(response.data).data;
-    } catch (error: unknown) {
+    } catch (error) {
         throw toAppError(error);
     }
 }

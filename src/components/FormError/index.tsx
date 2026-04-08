@@ -1,4 +1,7 @@
-import type { FormErrorProps } from "./types";
+type FormErrorProps = {
+  error?: string;
+  id?: string;
+};
 
 export function FormError({ error, id }: FormErrorProps) {
   if (!error) return null;

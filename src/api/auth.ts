@@ -1,13 +1,6 @@
 import { z } from "zod";
 import { apiClient } from "./client";
 
-// Types
-export type LoginPayload = {
-    email: string;
-    password: string;
-};
-
-// Schemas
 const UserSchema = z.object({
     id: z.number().int(),
     name: z.string(),
@@ -27,16 +20,12 @@ const MeResponseSchema = z.object({
     data: UserSchema,
 });
 
-export type MeResponse = z.infer<typeof MeResponseSchema>;
-
-// API functions
-export async function loginUser(payload: LoginPayload): Promise<LoginResponse> {
+export async function loginUser(payload: { email: string; password: string }) {
     const response = await apiClient.post("/login", payload);
     return LoginResponseSchema.parse(response.data);
 }
 
-export async function getMe(): Promise<User> {
+export async function getMe() {
     const response = await apiClient.get("/me");
-    const parsed: MeResponse = MeResponseSchema.parse(response.data);
-    return parsed.data;
+    return MeResponseSchema.parse(response.data).data;
 }

@@ -1,4 +1,8 @@
-import type { TextInputProps } from "./types";
+type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  label?: string;
+  error?: string;
+  errorId?: string;
+};
 
 export function TextInput({
   label,

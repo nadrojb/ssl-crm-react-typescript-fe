@@ -9,10 +9,10 @@ const navItems = [
   { icon: Calendar, label: "Calendar", href: "/calendar" },
 ];
 
-interface SidebarProps {
+type SidebarProps = {
   isOpen: boolean;
   onClose: () => void;
-}
+};
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (

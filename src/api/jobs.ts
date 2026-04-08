@@ -6,20 +6,10 @@ import JobDetailsSchema, {
     type Job,
     type JobDetails,
 } from "./schemas/job";
-import {
-    InstitutionSchema,
-    type Institution,
-    type InstitutionType,
-    type PrimaryContact,
-} from "./schemas/institution";
-import type {CreateJobRequest} from "./schemas/job-requests.ts";
+import type { CreateJobRequest } from "./schemas/job-requests";
 
-// Re-exports
-export { InstitutionSchema, type Institution, type InstitutionType, type PrimaryContact };
 export { JobSchema, type Job };
 export type { JobDetails };
-
-// Schemas
 export const JobsListResponseSchema = z.object({
     data: z.array(JobSchema),
 });
@@ -28,11 +18,8 @@ export const JobResponseSchema = z.object({
     data: JobDetailsSchema,
 });
 
-// Types
 export type JobsListResponse = z.infer<typeof JobsListResponseSchema>;
-export type JobResponse = z.infer<typeof JobResponseSchema>;
 
-// API functions
 export async function getJobs(params?: {
     page?: number;
     perPage?: number;

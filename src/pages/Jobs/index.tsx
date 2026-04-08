@@ -70,7 +70,7 @@ export function Jobs() {
                     filterName: searchValue.trim().length > 0 ? searchValue.trim() : undefined,
                 });
                 setJobs(res.data);
-            } catch (err: unknown) {
+            } catch (err) {
                 setError(getErrorMessage(err));
             } finally {
                 setIsLoading(false);

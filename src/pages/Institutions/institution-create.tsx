@@ -28,7 +28,7 @@ export const InstitutionCreate = () => {
 
         setInstitutionTypes(institutionTypesRes.data);
         setContacts(contactsRes.data);
-      } catch (err: unknown) {
+      } catch (err) {
         setError(getErrorMessage(err));
       }
     };
@@ -43,7 +43,7 @@ export const InstitutionCreate = () => {
     try {
       const createdInstitution = await createInstitution(institution);
       navigate(`/institutions/${createdInstitution.id}`);
-    } catch (err: unknown) {
+    } catch (err) {
       setError(getErrorMessage(err));
       throw err;
     } finally {

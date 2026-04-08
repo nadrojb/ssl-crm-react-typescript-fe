@@ -1,22 +1,18 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { z, ZodError } from "zod";
+import { z } from "zod";
 import { useAuth } from "../../contexts/AuthContext";
 import { FormError } from "../../components/FormError";
 import { TextInput } from "../../components/TextInput";
 import { ButtonStandard } from "../../components/ButtonStandard";
 import { loginUser } from "../../api/auth";
+import { isAppError } from "../../api/errorHandler";
 import { mapValidationErrors } from "../../utils/errors";
-import type { AppError } from "../../api/errorHandler";
 
 const LoginSchema = z.object({
   email: z.string().trim().toLowerCase().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
-
-type LoginFields = "email" | "password";
-
-type FieldErrors = Partial<Record<LoginFields | "submit", string>>;
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -24,7 +20,7 @@ export default function LoginForm() {
     password: "",
   });
 
-  const [errors, setErrors] = useState<FieldErrors>({});
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
@@ -35,8 +31,7 @@ export default function LoginForm() {
 
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear field error on change
-    if (errors[name as keyof FieldErrors]) {
+    if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
@@ -52,39 +47,32 @@ export default function LoginForm() {
         password: formData.password,
       };
 
-      // Client-side validation
-      const validated = LoginSchema.parse(candidate);
+      const result = LoginSchema.safeParse(candidate);
 
-      // API call (already wrapped with AppError)
-      const { token } = await loginUser(validated);
-
-      await login(token);
-      navigate("/");
-    } catch (err) {
-      // Zod (client-side validation errors)
-      if (err instanceof ZodError) {
-        const fieldErrors: FieldErrors = {};
-
-        for (const issue of err.issues) {
+      if (!result.success) {
+        const fieldErrors: Record<string, string> = {};
+        for (const issue of result.error.issues) {
           const field = issue.path[0];
           if (typeof field === "string") {
-            fieldErrors[field as LoginFields] = issue.message;
+            fieldErrors[field] = issue.message;
           }
         }
-
         setErrors(fieldErrors);
         return;
       }
 
-      // API errors (already normalised)
-      const error = err as AppError;
-
-      if (error.type === "validation") {
-        setErrors(mapValidationErrors<LoginFields>(error.errors));
-      } else {
+      const { token } = await loginUser(result.data);
+      await login(token);
+      navigate("/");
+    } catch (err) {
+      if (isAppError(err) && err.type === "validation") {
+        setErrors(mapValidationErrors(err.errors));
+      } else if (isAppError(err) && err.type !== "validation") {
         setErrors({
-          submit: error.message ?? "Unable to sign in. Please try again.",
+          submit: err.message ?? "Unable to sign in. Please try again.",
         });
+      } else {
+        setErrors({ submit: "Unable to sign in. Please try again." });
       }
     } finally {
       setIsSubmitting(false);

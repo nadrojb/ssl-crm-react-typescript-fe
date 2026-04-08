@@ -20,8 +20,8 @@ export const JobSchema = z.object({
     .object({
       id: z.number().int(),
       name: z.string(),
-      created_at: z.union([z.string(), z.null()]).optional(),
-      updated_at: z.union([z.string(), z.null()]).optional(),
+      created_at: z.string().nullable().optional(),
+      updated_at: z.string().nullable().optional(),
     })
     .optional(),
   users: z
@@ -49,8 +49,8 @@ const JobDetailsSchema = z.object({
     .object({
       id: z.number().int(),
       name: z.string(),
-      created_at: z.union([z.string(), z.null()]).optional(),
-      updated_at: z.union([z.string(), z.null()]).optional(),
+      created_at: z.string().nullable().optional(),
+      updated_at: z.string().nullable().optional(),
     })
     .optional(),
   users: z

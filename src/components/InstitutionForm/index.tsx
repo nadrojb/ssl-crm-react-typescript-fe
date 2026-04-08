@@ -4,7 +4,7 @@ import React, { useRef, useState } from "react";
 import { ButtonStandard } from "../ButtonStandard";
 import { FormError } from "../FormError";
 import { TextInput } from "../TextInput";
-import { mapValidationErrors, type FieldErrors } from "../../utils/errors";
+import { mapValidationErrors } from "../../utils/errors";
 import { isAppError, toAppError } from "../../api/errorHandler";
 import {
   CreateInstitutionRequestSchema,
@@ -15,19 +15,6 @@ import type { Contact } from "../../api/schemas/contact";
 import type { InstitutionType } from "../../api/institution-types";
 
 type PrimaryContactMode = "existing" | "new";
-
-type InstitutionFormFields =
-  | "name"
-  | "type_id"
-  | "contact_id"
-  | "service_due_at"
-  | "service_booked_at"
-  | "remedials_booked_at"
-  | "first_name"
-  | "last_name"
-  | "email"
-  | "phone_number"
-  | "submit";
 
 type InstitutionFormValues = {
   name: string;
@@ -118,9 +105,7 @@ export const InstitutionForm = ({
     contactPhoneNumber: "",
   });
 
-  const [fieldErrors, setFieldErrors] = useState<
-    FieldErrors<InstitutionFormFields>
-  >({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string | undefined>>({});
 
   const contactOptions = [...contacts].sort(compareContactsByName).map(toContactOption);
 
@@ -130,7 +115,7 @@ export const InstitutionForm = ({
     const { name, value } = e.target;
 
     setValues((prev) => ({ ...prev, [name]: value }));
-    if (fieldErrors[name as InstitutionFormFields]) {
+    if (fieldErrors[name]) {
       setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
@@ -140,10 +125,8 @@ export const InstitutionForm = ({
     setFieldErrors((prev) => ({ ...prev, contact_id: undefined }));
   };
 
-  const validatePayload = (
-    payload: InstitutionFormSubmitPayload
-  ): FieldErrors<InstitutionFormFields> => {
-    const nextErrors: FieldErrors<InstitutionFormFields> = {};
+  const validatePayload = (payload: InstitutionFormSubmitPayload) => {
+    const nextErrors: Record<string, string> = {};
 
     const institutionResult = CreateInstitutionRequestSchema.omit({ contact: true }).safeParse(
       payload.institution
@@ -217,12 +200,10 @@ export const InstitutionForm = ({
 
     try {
       await onSubmit(payload);
-    } catch (err: unknown) {
+    } catch (err) {
       const appError = isAppError(err) ? err : toAppError(err);
       if (appError.type === "validation") {
-        setFieldErrors(
-          mapValidationErrors<InstitutionFormFields>(appError.errors)
-        );
+        setFieldErrors(mapValidationErrors(appError.errors));
         return;
       }
 

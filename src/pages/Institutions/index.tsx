@@ -108,7 +108,7 @@ export function Institutions() {
                         filterValue === "all" ? undefined : Number(filterValue),
                 });
                 setInstitutions(res.data);
-            } catch (err: unknown) {
+            } catch (err) {
                 setError(getErrorMessage(err));
             } finally {
                 setIsLoading(false);
