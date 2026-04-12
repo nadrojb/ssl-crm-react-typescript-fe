@@ -4,8 +4,6 @@ import React, { useRef, useState } from "react";
 import { ButtonStandard } from "../ButtonStandard";
 import { FormError } from "../FormError";
 import { TextInput } from "../TextInput";
-import { mapValidationErrors } from "../../utils/errors";
-import { isAppError, toAppError } from "../../api/errorHandler";
 import { type CreateInstitutionRequest } from "../../api/schemas/institution-requests";
 import type { Contact } from "../../api/schemas/contact";
 import type { InstitutionType } from "../../api/institution-types";
@@ -37,6 +35,8 @@ type InstitutionFormProps = {
   submitLabel: string;
   isSubmitting: boolean;
   errorMessage?: string;
+  fieldErrors: Record<string, string | undefined>;
+  onFieldErrorsClear: (name: string) => void;
   onSubmit: (payload: InstitutionFormSubmitPayload) => Promise<void>;
 };
 
@@ -78,6 +78,8 @@ export const InstitutionForm = ({
   submitLabel,
   isSubmitting,
   errorMessage,
+  fieldErrors,
+  onFieldErrorsClear,
   onSubmit,
 }: InstitutionFormProps) => {
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -101,7 +103,6 @@ export const InstitutionForm = ({
     contactPhoneNumber: "",
   });
 
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string | undefined>>({});
 
   const contactOptions = [...contacts].sort(compareContactsByName).map(toContactOption);
 
@@ -112,13 +113,13 @@ export const InstitutionForm = ({
 
     setValues((prev) => ({ ...prev, [name]: value }));
     if (fieldErrors[name]) {
-      setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
+      onFieldErrorsClear(name);
     }
   };
 
   const setPrimaryContactMode = (mode: PrimaryContactMode) => {
     setValues((prev) => ({ ...prev, primaryContactMode: mode }));
-    setFieldErrors((prev) => ({ ...prev, contact_id: undefined }));
+    onFieldErrorsClear("contact_id");
   };
 
   const buildSubmitPayload = (): InstitutionFormSubmitPayload => {
@@ -153,24 +154,8 @@ export const InstitutionForm = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setFieldErrors({});
-
     const payload = buildSubmitPayload();
-
-    try {
-      await onSubmit(payload);
-    } catch (err) {
-      const appError = isAppError(err) ? err : toAppError(err);
-      if (appError.type === "validation") {
-        setFieldErrors(mapValidationErrors(appError.errors));
-        return;
-      }
-
-      setFieldErrors((prev) => ({
-        ...prev,
-        submit: appError.message ?? "Something went wrong. Please try again.",
-      }));
-    }
+    await onSubmit(payload);
   };
 
   return (

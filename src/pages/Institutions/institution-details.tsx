@@ -3,11 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { getContacts } from "../../api/contacts";
 import { getInstitutionTypes, type InstitutionType } from "../../api/institution-types";
-import { getInstitution, updateInstitution } from "../../api/institutions";
+import {deleteInstitution, getInstitution, updateInstitution} from "../../api/institutions";
 import { getJobs, type Job } from "../../api/jobs";
 import type { Institution } from "../../api/schemas/institution";
 import type { Contact } from "../../api/schemas/contact";
-import { getErrorMessage } from "../../utils/errors";
+import { getErrorMessage, mapValidationErrors } from "../../utils/errors";
+import { isAppError } from "../../api/errorHandler";
 import { Card } from "../../components/Card";
 import { Drawer } from "../../components/Drawer";
 import { DataTable } from "../../components/DataTable";
@@ -96,6 +97,7 @@ export function InstitutionDetails() {
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string | undefined>>({});
 
   useEffect(() => {
     const loadPageData = async () => {
@@ -140,10 +142,17 @@ export function InstitutionDetails() {
 
   const handleEditSubmit = async ({ institution: payload }: InstitutionFormSubmitPayload) => {
     setIsSubmitting(true);
+    setFieldErrors({});
     try {
       const updatedInstitution = await updateInstitution(institutionId, payload);
       setInstitution(updatedInstitution);
       setIsEditDrawerOpen(false);
+    } catch (err) {
+      if (isAppError(err) && err.type === "validation") {
+        setFieldErrors(mapValidationErrors(err.errors));
+      } else {
+        setFieldErrors({ submit: "Something went wrong. Please try again." });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -157,6 +166,8 @@ export function InstitutionDetails() {
           message="Are you sure you want to archive this institution?"
           onClose={() => setIsConfirmModalOpen(false)}
           onConfirm={() => {
+            deleteInstitution(institutionId, { id: institutionId });
+            navigate("/institutions");
             setIsConfirmModalOpen(false);
           }}
       />
@@ -185,6 +196,8 @@ export function InstitutionDetails() {
               contacts={contacts}
               submitLabel="Save"
               isSubmitting={isSubmitting}
+              fieldErrors={fieldErrors}
+              onFieldErrorsClear={(name) => setFieldErrors((prev) => ({ ...prev, [name]: undefined }))}
               onSubmit={handleEditSubmit}
             />
           ) : null}

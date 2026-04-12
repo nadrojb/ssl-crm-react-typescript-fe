@@ -5,7 +5,7 @@ import { z } from "zod";
 import { toAppError } from "./errorHandler";
 import { InstitutionSchema } from "./schemas/institution";
 import {
-    type CreateInstitutionRequest,
+    type CreateInstitutionRequest, type DeleteInstitutionRequest,
     type UpdateInstitutionRequest,
 } from "./schemas/institution-requests";
 
@@ -58,6 +58,16 @@ export async function updateInstitution(id: number, payload: UpdateInstitutionRe
     try {
         const response = await apiClient.patch(`/institutions/${id}`, payload);
         return InstitutionResponseSchema.parse(response.data).data;
+    } catch (error) {
+        throw toAppError(error);
+    }
+}
+
+export async function deleteInstitution(id: number, payload: DeleteInstitutionRequest): Promise<void> {
+    try {
+        await apiClient.delete(`/institutions/${id}`, {
+            data: payload,
+        });
     } catch (error) {
         throw toAppError(error);
     }
