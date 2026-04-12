@@ -6,11 +6,7 @@ import { FormError } from "../FormError";
 import { TextInput } from "../TextInput";
 import { mapValidationErrors } from "../../utils/errors";
 import { isAppError, toAppError } from "../../api/errorHandler";
-import {
-  CreateInstitutionRequestSchema,
-  NewContactPayloadSchema,
-  type CreateInstitutionRequest,
-} from "../../api/schemas/institution-requests";
+import { type CreateInstitutionRequest } from "../../api/schemas/institution-requests";
 import type { Contact } from "../../api/schemas/contact";
 import type { InstitutionType } from "../../api/institution-types";
 
@@ -18,7 +14,7 @@ type PrimaryContactMode = "existing" | "new";
 
 type InstitutionFormValues = {
   name: string;
-  type_id: string;
+  institution_type_id: string;
   service_due_at: string;
   service_booked_at: string;
   remedials_booked_at: string;
@@ -87,7 +83,7 @@ export const InstitutionForm = ({
   const formRef = useRef<HTMLFormElement | null>(null);
   const [values, setValues] = useState<InstitutionFormValues>({
     name: initialValues?.name ?? "",
-    type_id: initialValues?.type_id != null ? String(initialValues.type_id) : "",
+    institution_type_id: initialValues?.institution_type_id != null ? String(initialValues.institution_type_id) : "",
     service_due_at: initialValues?.service_due_at ?? "",
     service_booked_at: initialValues?.service_booked_at ?? "",
     remedials_booked_at: initialValues?.remedials_booked_at ?? "",
@@ -125,37 +121,6 @@ export const InstitutionForm = ({
     setFieldErrors((prev) => ({ ...prev, contact_id: undefined }));
   };
 
-  const validatePayload = (payload: InstitutionFormSubmitPayload) => {
-    const nextErrors: Record<string, string> = {};
-
-    const institutionResult = CreateInstitutionRequestSchema.omit({ contact: true }).safeParse(
-      payload.institution
-    );
-    if (!institutionResult.success) {
-      for (const issue of institutionResult.error.issues) {
-        const path = issue.path[0];
-        if (path === "name") nextErrors.name = issue.message;
-        if (path === "type_id") nextErrors.type_id = issue.message;
-      }
-    }
-
-    const { contact } = payload.institution;
-    if (contact !== null && "first_name" in contact) {
-      const contactResult = NewContactPayloadSchema.safeParse(contact);
-      if (!contactResult.success) {
-        for (const issue of contactResult.error.issues) {
-          const path = issue.path[0];
-          if (path === "first_name") nextErrors.first_name = issue.message;
-          if (path === "last_name") nextErrors.last_name = issue.message;
-          if (path === "email") nextErrors.email = issue.message;
-          if (path === "phone_number") nextErrors.phone_number = issue.message;
-        }
-      }
-    }
-
-    return nextErrors;
-  };
-
   const buildSubmitPayload = (): InstitutionFormSubmitPayload => {
     const existingContactId = toNullableNumber(values.existingPrimaryContactId);
 
@@ -178,7 +143,7 @@ export const InstitutionForm = ({
       institution: {
         name: values.name.trim(),
         contact,
-        type_id: toNullableNumber(values.type_id),
+        institution_type_id: toNullableNumber(values.institution_type_id),
         service_due_at: toNullableDateString(values.service_due_at),
         service_booked_at: toNullableDateString(values.service_booked_at),
         remedials_booked_at: toNullableDateString(values.remedials_booked_at),
@@ -191,12 +156,6 @@ export const InstitutionForm = ({
     setFieldErrors({});
 
     const payload = buildSubmitPayload();
-    const nextErrors = validatePayload(payload);
-
-    if (Object.keys(nextErrors).length > 0) {
-      setFieldErrors(nextErrors);
-      return;
-    }
 
     try {
       await onSubmit(payload);
@@ -233,8 +192,8 @@ export const InstitutionForm = ({
           Type
         </label>
         <select
-          name="type_id"
-          value={values.type_id}
+          name="institution_type_id"
+          value={values.institution_type_id}
           onChange={handleChange}
           className="block w-full rounded-sm border-0 bg-white py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-blue-500 sm:text-sm cursor-pointer"
         >
@@ -245,8 +204,8 @@ export const InstitutionForm = ({
             </option>
           ))}
         </select>
-        {fieldErrors.type_id ? (
-          <p className="text-sm text-red-600">{fieldErrors.type_id}</p>
+        {fieldErrors.institution_type_id ? (
+          <p className="text-sm text-red-600">{fieldErrors.institution_type_id}</p>
         ) : null}
       </div>
 

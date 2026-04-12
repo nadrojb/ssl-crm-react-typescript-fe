@@ -20,7 +20,7 @@ export const Drawer = ({ isOpen, title, onClose, children }: DrawerProps) => {
       <div
         role="dialog"
         aria-modal="true"
-        className="absolute right-0 top-0 h-full w-full max-w-lg bg-white shadow-xl"
+        className="absolute right-0 top-0 h-full w-full max-w-lg bg-white shadow-xl flex flex-col"
       >
         <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-4">
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>

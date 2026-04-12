@@ -21,7 +21,7 @@ export const ContactPayloadSchema = z.union([
 export const CreateInstitutionRequestSchema = z.object({
   name: z.string().min(1).max(255),
   contact: ContactPayloadSchema.nullable(),
-  type_id: z.number().int().nullable(),
+  institution_type_id: z.number().int().nullable(),
   service_due_at: NullableDateStringSchema,
   service_booked_at: NullableDateStringSchema,
   remedials_booked_at: NullableDateStringSchema,

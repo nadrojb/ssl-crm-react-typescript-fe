@@ -30,7 +30,6 @@ export const InstitutionSchema = z.object({
   service_due_at: NullableStringSchema,
   service_booked_at: NullableStringSchema,
   remedials_booked_at: NullableStringSchema,
-  created_at: z.string(),
 });
 
 export type PrimaryContact = z.infer<typeof PrimaryContactSchema>;

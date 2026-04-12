@@ -7,7 +7,8 @@ export function mapValidationErrors(
 
     for (const [key, messages] of Object.entries(errors)) {
         if (Array.isArray(messages) && messages.length > 0) {
-            result[key] = messages[0];
+            const fieldKey = key.includes(".") ? key.split(".").pop()! : key;
+            result[fieldKey] = messages[0];
         }
     }
 

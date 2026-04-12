@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ZodError } from "zod";
 
 export type AppError =
     | { type: "validation"; errors: Record<string, string[]> }
@@ -21,6 +22,12 @@ export function toAppError(error: unknown): AppError {
         return { type: "server", message: data?.message ?? "Something went wrong.", status };
     }
 
+    if (error instanceof ZodError) {
+        console.error("[AppError] Response schema mismatch:", error.issues);
+        return { type: "unknown", message: "Unexpected response format from the server." };
+    }
+
+    console.error("[AppError] Unexpected error:", error);
     return { type: "unknown", message: "An unexpected error occurred." };
 }
 

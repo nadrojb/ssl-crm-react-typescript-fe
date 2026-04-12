@@ -176,7 +176,7 @@ export function InstitutionDetails() {
                 contact: institution.primary_contact
                   ? { id: institution.primary_contact.id }
                   : null,
-                type_id: institution.type?.id ?? null,
+                institution_type_id: institution.type?.id ?? null,
                 service_due_at: institution.service_due_at,
                 service_booked_at: institution.service_booked_at,
                 remedials_booked_at: institution.remedials_booked_at,
