@@ -8,7 +8,6 @@ export const JobInstitutionSchema = z.object({
   service_due_at: NullableStringSchema,
   service_booked_at: NullableStringSchema,
   remedials_booked_at: NullableStringSchema,
-  created_at: z.string(),
 });
 
 export const JobSchema = z.object({
@@ -20,8 +19,6 @@ export const JobSchema = z.object({
     .object({
       id: z.number().int(),
       name: z.string(),
-      created_at: z.string().nullable().optional(),
-      updated_at: z.string().nullable().optional(),
     })
     .optional(),
   users: z

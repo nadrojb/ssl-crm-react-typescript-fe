@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiClient } from "../api/client";
 import { getMe, type User } from "../api/auth";
 
@@ -19,6 +20,8 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const TOKEN_KEY = "auth_token";
+
+const navigate = useNavigate();
 
 const setAuthHeader = (token: string | null) => {
   if (token) {
@@ -53,6 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem(TOKEN_KEY);
         setAuthHeader(null);
         setUser(null);
+        navigate("/login");
       })
       .finally(() => {
         setIsReady(true);
