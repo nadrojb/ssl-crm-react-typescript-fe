@@ -21,8 +21,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const TOKEN_KEY = "auth_token";
 
-const navigate = useNavigate();
-
 const setAuthHeader = (token: string | null) => {
   if (token) {
     apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -33,6 +31,7 @@ const setAuthHeader = (token: string | null) => {
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [isReady, setIsReady] = useState(false);
 
@@ -77,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthHeader(null);
     setUser(null);
     setIsReady(true);
+    navigate("/login");
   };
 
   const value = useMemo(() => {
