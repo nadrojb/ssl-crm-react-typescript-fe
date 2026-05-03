@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { getJob, type JobDetails as JobDetailsData } from "../../api/jobs";
-import { getErrorMessage } from "../../utils/errors";
+import {getJob, type JobDetails as JobDetailsData, updateJob} from "../../api/jobs";
+import { getJobTypes, type JobType } from "../../api/job-types";
+import { getInstitutions, type Institution } from "../../api/institutions";
+import {getErrorMessage, mapValidationErrors} from "../../utils/errors";
 import { ButtonStandard } from "../../components/ButtonStandard";
 import { Card } from "../../components/Card";
 import { DataTable } from "../../components/DataTable";
 import { Layout } from "../../components/Layout";
 import { ConfirmModal } from "../../components/ConfirmModal";
+import { Drawer } from "../../components/Drawer";
+import {isAppError} from "../../api/errorHandler.ts";
+import {JobForm, type JobFormSubmitPayload} from "../../Jobform";
 
 type TaskRow = {
   name: string;
@@ -59,14 +64,25 @@ export function JobDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string | undefined>>({});
+  const [jobTypes, setJobTypes] = useState<JobType[]>([]);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const res = await getJob(jobId);
-        setJob(res);
+        const [jobRes, jobTypesRes, institutionsRes] = await Promise.all([
+          getJob(jobId),
+          getJobTypes({ page: 1, perPage: 250 }),
+          getInstitutions({ page: 1, perPage: 250 }),
+        ]);
+        setJob(jobRes);
+        setJobTypes(jobTypesRes.data);
+        setInstitutions(institutionsRes.data);
       } catch (err) {
         setError(getErrorMessage(err));
       } finally {
@@ -75,6 +91,24 @@ export function JobDetails() {
     };
     loadData();
   }, [jobId]);
+
+  const handleEditSubmit = async ({ job: payload }: JobFormSubmitPayload) => {
+    setIsSubmitting(true);
+    setFieldErrors({});
+    try {
+      const updatedJob = await updateJob(jobId, payload);
+      setJob(updatedJob);
+      setIsEditDrawerOpen(false);
+    } catch (err) {
+      if (isAppError(err) && err.type === "validation") {
+        setFieldErrors(mapValidationErrors(err.errors));
+      } else {
+        setFieldErrors({ submit: "Something went wrong." });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Layout title={job?.name ?? "JobDetails"}>
@@ -88,6 +122,33 @@ export function JobDetails() {
             setIsConfirmModalOpen(false);
           }}
         />
+        <div className="space-y-6">
+          <Drawer
+              isOpen={isEditDrawerOpen}
+              title="Edit job"
+              onClose={() => {
+                if (isSubmitting) return;
+                setIsEditDrawerOpen(false);
+              }}
+          >
+            {job ? (
+                <JobForm
+                    initialValues={{
+                      name: job.name,
+                      institution_id: job.institution?.id,
+                      crm_job_type_id: job.crm_job_type?.id,
+                    }}
+                    jobTypes={jobTypes}
+                    institutions={institutions}
+                    submitLabel="Save"
+                    isSubmitting={isSubmitting}
+                    fieldErrors={fieldErrors}
+                    onFieldErrorsClear={(name) => setFieldErrors((prev) => ({ ...prev, [name]: undefined }))}
+                    onSubmit={handleEditSubmit}
+                />
+            ) : null}
+          </Drawer>
+        </div>
         <div className="flex items-start justify-end gap-3">
           <ButtonStandard type="button" variant="success" size="sm">
             Complete
@@ -100,7 +161,12 @@ export function JobDetails() {
           >
             Archive
           </ButtonStandard>
-          <ButtonStandard type="button" variant="secondary" size="sm">
+          <ButtonStandard
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsEditDrawerOpen(true)}
+          >
             Edit
           </ButtonStandard>
         </div>
@@ -134,16 +200,6 @@ export function JobDetails() {
                         {job?.crm_job_type?.name ?? "—"}
                       </div>
                     </div>
-
-                    <div>
-                      <div className="text-xs uppercase tracking-wide text-gray-500">
-                        Status
-                      </div>
-                      <div className="mt-1 text-sm font-medium text-gray-900">
-                        {job?.completed_at != null ? "Complete" : "Due"}
-                      </div>
-                    </div>
-
                     <div>
                       <div className="text-xs uppercase tracking-wide text-gray-500">
                         Assigned to

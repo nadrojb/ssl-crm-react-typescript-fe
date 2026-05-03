@@ -10,7 +10,7 @@ import InstitutionDetails from "./pages/Institutions/institution-details";
 import InstitutionCreate from "./pages/Institutions/institution-create";
 import Calendar from "./pages/Calendar";
 import Tasks from "./pages/Tasks";
-// import JobCreate from "./pages/Jobs/job-create.tsx";
+import JobCreate from "./pages/Jobs/job-create.tsx";
 
 function App() {
   return (
@@ -23,8 +23,8 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
           <Route path="/jobs" element={<ProtectedRoute><Jobs/></ProtectedRoute>}/>
+          <Route path="/jobs/new" element={<ProtectedRoute><JobCreate/></ProtectedRoute>}/>
           <Route path="/jobs/:id" element={<ProtectedRoute><JobDetails/></ProtectedRoute>}/>
-          {/*<Route path="/jobs/new" element={<ProtectedRoute><JobCreate/></ProtectedRoute>}/>*/}
 
 
           <Route path="/institutions" element={<ProtectedRoute><Institutions/></ProtectedRoute>}/>

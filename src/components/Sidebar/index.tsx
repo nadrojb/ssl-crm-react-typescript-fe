@@ -30,7 +30,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         }`}
       >
         <div className="flex h-16 items-center justify-between px-4">
-          <span className="text-xl font-bold">SSL CRM</span>
+          <span className="text-lg font-semibold space-x-1 font-sans text-blue-600">Seating Services ltd</span>
           <button onClick={onClose} className="md:hidden p-1">
             <X className="h-6 w-6" />
           </button>

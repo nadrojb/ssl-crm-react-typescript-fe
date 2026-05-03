@@ -9,7 +9,7 @@ import {ButtonStandard} from "../components/ButtonStandard";
 type JobFormValues = {
     name: string;
     institution_id: string;
-    job_type_id: string;
+    crm_job_type_id: string;
 };
 
 export type JobFormSubmitPayload = {
@@ -50,15 +50,15 @@ export function JobForm({
           institution_id = String(initialValues.institution_id)
       }
 
-      let job_type_id = "";
-      if (initialValues?.job_type_id) {
-          job_type_id = String(initialValues.job_type_id)
+      let crm_job_type_id = "";
+      if (initialValues?.crm_job_type_id) {
+          crm_job_type_id = String(initialValues.crm_job_type_id)
       }
 
       return {
           name,
           institution_id,
-          job_type_id
+          crm_job_type_id
       }
     })
 
@@ -67,7 +67,7 @@ export function JobForm({
             job: {
                 name: values.name.trim(),
                 institution_id: Number(values.institution_id),
-                job_type_id: Number(values.job_type_id),
+                crm_job_type_id: Number(values.crm_job_type_id),
             },
         }
     }
@@ -111,8 +111,8 @@ export function JobForm({
                 </label>
 
                 <select
-                    name="job_type_id"
-                    value={values.job_type_id}
+                    name="crm_job_type_id"
+                    value={values.crm_job_type_id}
                     onChange={handleChange}
                     className="block w-full rounded-sm border-0 bg-white py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-blue-500 sm:text-sm cursor-pointer"
                 >
@@ -124,24 +124,23 @@ export function JobForm({
                     ))}
                 </select>
 
-                {fieldErrors.job_type_id && (
+                {fieldErrors.crm_job_type_id && (
                     <p className="text-sm text-red-600">
-                        {fieldErrors.job_type_id}
+                        {fieldErrors.crm_job_type_id}
                     </p>
                 )}
             </div>
             <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-900">
-                    Type
+                    Institution
                 </label>
-
                 <select
                     name="institution_id"
                     value={values.institution_id}
                     onChange={handleChange}
                     className="block w-full rounded-sm border-0 bg-white py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-blue-500 sm:text-sm cursor-pointer"
                 >
-                    <option value="">No type</option>
+                    <option value="">No institution</option>
                     {institutions?.map((type) => (
                         <option key={type.id} value={String(type.id)}>
                             {type.name}
@@ -149,9 +148,9 @@ export function JobForm({
                     ))}
                 </select>
 
-                {fieldErrors.job_type_id && (
+                {fieldErrors.institution_id && (
                     <p className="text-sm text-red-600">
-                        {fieldErrors.job_type_id}
+                        {fieldErrors.institution_id}
                     </p>
                 )}
             </div>

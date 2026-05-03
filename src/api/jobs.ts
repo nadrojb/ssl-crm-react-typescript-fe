@@ -6,7 +6,7 @@ import JobDetailsSchema, {
     type Job,
     type JobDetails,
 } from "./schemas/job";
-import type { CreateJobRequest } from "./schemas/job-requests";
+import type {CreateJobRequest, UpdateJobRequest} from "./schemas/job-requests";
 
 export { JobSchema, type Job };
 export type { JobDetails };
@@ -56,6 +56,15 @@ export async function getJob(id: number): Promise<JobDetails> {
 export async function createJob(payload: CreateJobRequest): Promise<JobDetails> {
     try {
         const response = await apiClient.post("/jobs", payload);
+        return JobResponseSchema.parse(response.data).data;
+    } catch (error) {
+        throw toAppError(error);
+    }
+}
+
+export async function updateJob(id: number, payload: UpdateJobRequest) {
+    try {
+        const response = await apiClient.patch(`/jobs/${id}`, payload);
         return JobResponseSchema.parse(response.data).data;
     } catch (error) {
         throw toAppError(error);

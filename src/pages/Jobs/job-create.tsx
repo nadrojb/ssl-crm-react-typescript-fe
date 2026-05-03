@@ -43,7 +43,7 @@ export const JobCreate = () => {
 
         try {
             const createdJob = await createJob(job);
-            navigate(`/institutions/${createdJob.id}`);
+            navigate(`/jobs/${createdJob.id}`);
         } catch (err: unknown) {
             setError(getErrorMessage(err));
             throw err;
