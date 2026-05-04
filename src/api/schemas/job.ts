@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { JobTypeSchema } from "../job-types";
 
 const NullableStringSchema = z.string().nullable();
 
@@ -15,12 +16,7 @@ export const JobSchema = z.object({
   uuid: NullableStringSchema,
   name: z.string(),
   institution: JobInstitutionSchema,
-  crm_job_type: z
-    .object({
-      id: z.number().int(),
-      name: z.string(),
-    })
-    .optional(),
+  crm_job_type: JobTypeSchema.optional(),
   users: z
     .array(
       z.object({
@@ -42,14 +38,7 @@ const JobDetailsSchema = z.object({
   uuid: NullableStringSchema,
   name: z.string(),
   institution: JobInstitutionSchema.optional(),
-  crm_job_type: z
-    .object({
-      id: z.number().int(),
-      name: z.string(),
-      created_at: z.string().nullable().optional(),
-      updated_at: z.string().nullable().optional(),
-    })
-    .optional(),
+  crm_job_type: JobTypeSchema.optional(),
   users: z
     .array(
       z.object({

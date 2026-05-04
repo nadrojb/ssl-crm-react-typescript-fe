@@ -36,11 +36,3 @@ export const UpdateInstitutionRequestSchema = CreateInstitutionRequestSchema.par
 export type UpdateInstitutionRequest = z.infer<
   typeof UpdateInstitutionRequestSchema
 >;
-
-export const DeleteInstitutionRequestSchema = z.object({
-  id: z.number().int(),
-});
-
-export type DeleteInstitutionRequest = z.infer<
-  typeof DeleteInstitutionRequestSchema
->;

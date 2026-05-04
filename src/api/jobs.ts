@@ -70,3 +70,11 @@ export async function updateJob(id: number, payload: UpdateJobRequest) {
         throw toAppError(error);
     }
 }
+
+export async function deleteJob(id: number): Promise<void> {
+    try {
+        await apiClient.delete(`/jobs/${id}`);
+    } catch (error) {
+        throw toAppError(error);
+    }
+}

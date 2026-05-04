@@ -10,4 +10,3 @@ export type CreateJobRequest = z.infer<typeof CreateJobRequestSchema>;
 
 export const UpdateJobRequestSchema = CreateJobRequestSchema.partial();
 export type UpdateJobRequest = z.infer<typeof UpdateJobRequestSchema>;
-

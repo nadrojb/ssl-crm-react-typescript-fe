@@ -5,7 +5,7 @@ import { z } from "zod";
 import { toAppError } from "./errorHandler";
 import { InstitutionSchema } from "./schemas/institution";
 import {
-    type CreateInstitutionRequest, type DeleteInstitutionRequest,
+    type CreateInstitutionRequest,
     type UpdateInstitutionRequest,
 } from "./schemas/institution-requests";
 
@@ -63,11 +63,9 @@ export async function updateInstitution(id: number, payload: UpdateInstitutionRe
     }
 }
 
-export async function deleteInstitution(id: number, payload: DeleteInstitutionRequest): Promise<void> {
+export async function deleteInstitution(id: number): Promise<void> {
     try {
-        await apiClient.delete(`/institutions/${id}`, {
-            data: payload,
-        });
+        await apiClient.delete(`/institutions/${id}`);
     } catch (error) {
         throw toAppError(error);
     }
